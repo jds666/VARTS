@@ -1,0 +1,23 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="visual">image/visual.png</file>
+        <file alias="pause">image/pause.png</file>
+        <file alias="play">image/play.png</file>
+        <file alias="restart">image/restart-line.png</file>
+        <file alias="3dscatter">image/3Dscatter.png</file>
+        <file alias="boxplot">image/boxplot.png</file>
+        <file alias="line">image/line.png</file>
+        <file alias="pie">image/pie.png</file>
+        <file alias="scatter">image/scatter.png</file>
+        <file alias="start1">image/start1.png</file>
+        <file alias="AD">image/anomalyD.png</file>
+        <file>20230427-03.xlsx</file>
+        <file alias="table">image/数据表格.png</file>
+        <file alias="anomaly">anomaly_result_e1.csv</file>
+        <file alias="td1000">Temperature_data_1000.csv</file>
+        <file alias="td10000">Temperature_data_10000.csv</file>
+        <file alias="td100000">Temperature_data_100000.csv</file>
+        <file alias="td1000000">Temperature_data_1000000.csv</file>
+        <file alias="td10000000">Temperature_data_10000000.csv</file>
+    </qresource>
+</RCC>
