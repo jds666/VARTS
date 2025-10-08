@@ -105,8 +105,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->action_table->setText("概况表");
 
 
-    //多倍速
+    //滑杆绑定
     connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::handleSpeedValueChanged);
+    connect(ui->horizontalSlider_k, &QSlider::valueChanged, this, &MainWindow::handleSelectKValueChanged);
+    connect(ui->horizontalSlider_alpha, &QSlider::valueChanged, this, &MainWindow::handleSelectAlphaValueChanged);
 
     //更换图栈
     ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->single_line));
@@ -134,6 +136,9 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->action_large,&QAction::triggered,this,[=]() {
         ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageLarge));
     });
+    connect(ui->action_representative,&QAction::triggered,this,[=]() {
+        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageRepresentative));
+    });
     //直接绘制异常图片
 //    tracerXText = new QCPItemText(ui->pageAd);
 //    tracerXText->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);//文字布局：顶、左对齐
@@ -148,9 +153,11 @@ MainWindow::MainWindow(QWidget *parent)
     tracer->setGraph(ui->pageAd->graph(0));// 设置游标吸附在ui->pageAd->graph(0)这条曲线上
     drawAnomalyDetection();
     drawLargeLine();
+    initDatasetComboBox();
 
-    // 更换数据列选项
+    // 更换下拉框内容
     connect(ui->comboBox, SIGNAL(activated(int)), this, SLOT(onComboBoxIndexChanged()));
+    connect(ui->comboBox_datasets, SIGNAL(activated(int)), this, SLOT(onComboBoxDatasetChanged()));
 
     //动态展示
     // 初始化播放状态和定时器
@@ -496,6 +503,18 @@ void MainWindow::handleSpeedValueChanged()
 {
     playSpeed = ui->horizontalSlider->value();
     ui->speedlabel->setText(QString::number(playSpeed)+" times speed");
+}
+
+void MainWindow::handleSelectKValueChanged()
+{
+    selectedK = ui->horizontalSlider_k->value();
+    ui->label_k_num->setText(QString::number(selectedK));
+}
+
+void MainWindow::handleSelectAlphaValueChanged()
+{
+    selectedAlpha = ui->horizontalSlider_alpha->value() / 100.0;
+    ui->label_alpha_num->setText(QString::number(selectedAlpha, 'f', 2));
 }
 
 void MainWindow::handleCheckBoxStateChanged(int state)
@@ -1144,7 +1163,7 @@ void MainWindow::onComboBoxIndexChanged()
         ydata = getColumnDataByColumnName(selectedItem);
 
         DrawPlot::drawScatterPlot(ui->pageScatter,xdata,ydata);
-        DrawPlot::drawLineChart(ui->single_line,xdata,ydata);
+        DrawPlot::drawSingleLineChart(ui->single_line,xdata,ydata);
         DrawPlot::drawBoxPlot(ui->pageBox,xdata,ydata,ui->comboBox->currentText());
     }
     else if(inputstatus == 4)
@@ -1158,13 +1177,29 @@ void MainWindow::onComboBoxIndexChanged()
 
         // 调用绘制图函数，将数据传递给它
         DrawPlot::drawScatterPlotByDB(ui->pageScatter,xdata,ydata,columnNamex,columnNamey);
-        DrawPlot::drawLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
+        DrawPlot::drawSingleLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
         DrawPlot::drawBoxPlotByDB(ui->pageBox,ydata,ui->comboBox->currentText());
 
     }
     else
     {
         qDebug()<<"onComboBoxIndexChanged no inputstatus == 3";
+    }
+}
+
+void MainWindow::onComboBoxDatasetChanged()
+{
+    try {
+        ui->statusbar->showMessage("正在更新数据。。。");
+        QString selectedFile = ui->comboBox_datasets->currentText();
+        loadDatasetAndUpdateLine(selectedFile);
+        ui->statusbar->showMessage("更新完成,数据集:"+selectedFile);
+    } catch (const std::exception& e) {
+        qDebug() << "Error in onComboBoxDatasetChanged:" << e.what();
+        QMessageBox::critical(this, "Error", QString("Failed to process dataset: %1").arg(e.what()));
+    } catch (...) {
+        qDebug() << "Unknown error in onComboBoxDatasetChanged";
+        QMessageBox::critical(this, "Error", "An unknown error occurred while processing dataset");
     }
 }
 
@@ -1269,7 +1304,7 @@ void MainWindow::onRestartButtonClicked()
 }
 
 
-QCustomPlot *MainWindow::createLineChart(const QString yText)
+QCustomPlot *MainWindow::createLineChart(const QString& yText)
 {
     QCustomPlot* customPlot = new QCustomPlot(this);
     if(inputstatus == 1 || inputstatus ==2)
@@ -1354,7 +1389,7 @@ QCustomPlot *MainWindow::createLineChart(const QString yText)
 }
 
 
-void MainWindow::drawTablePlot(QVector<QVector<QString>> Data)
+void MainWindow::drawTablePlot(const QVector<QVector<QString>>& Data)
 {
     if (!ui->tableWidget || !ui->comboBox) {
         qWarning("TableWidget or ComboBox is null!");
@@ -1535,7 +1570,7 @@ void MainWindow::initialPlot()
         // 调用绘制图函数，将数据传递给它
         drawTablePlot(Data);
         DrawPlot::drawScatterPlot(ui->pageScatter,xdata,ydata);
-        DrawPlot::drawLineChart(ui->single_line,xdata,ydata);
+        DrawPlot::drawSingleLineChart(ui->single_line,xdata,ydata);
         drawPiePlot();
         DrawPlot::drawBoxPlot(ui->pageBox,xdata,ydata,ui->comboBox->currentText());
         drawThreeD();
@@ -1553,7 +1588,7 @@ void MainWindow::initialPlot()
 
         drawTablePlotByDB();
         DrawPlot::drawScatterPlotByDB(ui->pageScatter,xdata,ydata,columnNamex,columnNamey);
-        DrawPlot::drawLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
+        DrawPlot::drawSingleLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
         drawPiePlotByDB();
         DrawPlot::drawBoxPlotByDB(ui->pageBox,ydata,ui->comboBox->currentText());
         drawThreeDByDB();
@@ -1933,22 +1968,22 @@ void MainWindow::drawLargeLine()
 
         // 间隔均匀采样
 //        qDebug() << "间隔均匀采样";
-//        auto sampledData = ProcessData::intervalSampling(timeSeconds, value, 1800);
+//        auto sampledData = ProcessData::intervalSample(timeSeconds, value, 1800);
 //        timeSeconds = sampledData.first;
 //        value = sampledData.second;
         // 间隔平均采样
 //        qDebug() << "间隔平均采样";
-//        auto sampledData = ProcessData::intervalAverageSampling(timeSeconds, value, 1800);
+//        auto sampledData = ProcessData::intervalAverageSample(timeSeconds, value, 1800);
 //        timeSeconds = sampledData.first;
 //        value = sampledData.second;
         // 最大最小采样
 //        qDebug() << "最大最小采样";
-//        auto sampledData = ProcessData::maxMinSampling(timeSeconds, value, 1800);
+//        auto sampledData = ProcessData::maxMinSample(timeSeconds, value, 1800);
 //        timeSeconds = sampledData.first;
 //        value = sampledData.second;
-        // M4 聚合 m4Sampling
+        // M4 聚合 m4Sample
 //        qDebug() << " M4 聚合 ";
-//        auto sampledData = ProcessData::m4Sampling(timeSeconds, value, 1800);
+//        auto sampledData = ProcessData::m4Sample(timeSeconds, value, 1800);
 //        timeSeconds = sampledData.first;
 //        value = sampledData.second;
 
@@ -1995,90 +2030,171 @@ void MainWindow::drawLargeLine()
         qDebug()<<filePath << " 绘制图表 执行时间:" << timer.elapsed() << "毫秒";
     }
 }
-//void MainWindow::drawLargeLine()
+void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
+{
+    try {
+        if (selectedFile.isEmpty()) return;
+
+        QString filePath = selectedFolder + "/" + selectedFile;
+        QVector<QVector<QString>> rawData = Util::readCSVWithColumnNames(filePath);
+
+        // 检查数据是否为空
+        if (rawData.isEmpty()) {
+            throw std::runtime_error("Loaded dataset is empty");
+        }
+
+        // === 1. 创建列名与颜色的映射（使用HSV色轮）===
+        QMap<QString, QColor> columnColors;
+        int totalColumns = rawData.size();
+        const int HUE_STEP = 40; // 固定步长，保持颜色差异明显
+        for (int i = 0; i < totalColumns; ++i) {
+            if (!rawData[i].isEmpty()) {
+                QString columnName = rawData[i][0];
+                // 使用固定步长，循环使用360度色轮
+                int hue = (i * HUE_STEP) % 360;
+                QColor color;
+                color.setHsv(hue, 200, 255); // 保持较高饱和度和明度，颜色更鲜艳
+
+                // 可选优化：如果列数超过9，微调步长避免颜色重复过于明显
+                if (totalColumns > 9) {
+                    // 增加一个小的随机偏移，避免列数多时颜色循环过于规律
+                    hue = (hue + (i * 13) % 20) % 360; // 13是质数，偏移更均匀
+                    color.setHsv(hue, 180 + (i % 3) * 25, 255); // 饱和度略有变化
+                }
+
+                columnColors[columnName] = color;
+            }
+        }
+
+        // 随机选择最多5列（如果总列数不足5则选全部）
+        int selectCount = qMin(5, totalColumns);
+        QVector<QVector<QString>> selectedData = Util::randomSelectColumns(rawData, selectCount);
+
+        // === 清理旧内容 ===
+        // 清理选中列的scrollArea
+        QWidget *oldSelectedWidget = ui->scrollArea_selected_column->widget();
+        if (oldSelectedWidget) oldSelectedWidget->deleteLater();
+
+        // 清理原始列的scrollArea
+        QWidget *oldOriginalWidget = ui->scrollArea_original_column->widget();
+        if (oldOriginalWidget) oldOriginalWidget->deleteLater();
+
+        // === 2. 显示原始列名到scrollArea_original_column（带颜色） ===
+        QWidget *originalScrollWidget = new QWidget;
+        QVBoxLayout *originalLayout = new QVBoxLayout(originalScrollWidget);
+        for (int c = 0; c < rawData.size(); ++c) {
+            if (!rawData[c].isEmpty()) {
+                QString columnName = rawData[c][0];
+                QLabel *label = new QLabel(columnName, this);
+                // 设置标签颜色为映射中的颜色
+                if (columnColors.contains(columnName)) {
+                    QPalette palette = label->palette();
+                    palette.setColor(QPalette::WindowText, columnColors[columnName]);
+                    label->setPalette(palette);
+                }
+                originalLayout->addWidget(label);
+            }
+        }
+        originalScrollWidget->setLayout(originalLayout);
+        ui->scrollArea_original_column->setWidget(originalScrollWidget);
+
+        // === 3. 显示选中列名到scrollArea_selected_column（带颜色）===
+        QWidget *selectedScrollWidget = new QWidget;
+        QVBoxLayout *selectedLayout = new QVBoxLayout(selectedScrollWidget);
+
+        if (!selectedData.isEmpty()) {
+            int colCount = selectedData.size();
+            qDebug() << "随机选中的列数: "<<colCount;
+
+            for (int c = 0; c < colCount; ++c) {
+                if (c < selectedData.size() && !selectedData[c].isEmpty()) {
+                    QString columnName = selectedData[c][0];
+                    QLabel *label = new QLabel(columnName, this);
+                    qDebug() << "第"<<c<<"行列名: "<<columnName;
+
+                    // 设置标签颜色为映射中的颜色
+                    if (columnColors.contains(columnName)) {
+                        QPalette palette = label->palette();
+                        palette.setColor(QPalette::WindowText, columnColors[columnName]);
+                        label->setPalette(palette);
+                    }
+
+                    selectedLayout->addWidget(label);
+                } else {
+                    QLabel *label = new QLabel("N/A", this);
+                    selectedLayout->addWidget(label);
+                }
+            }
+        } else {
+            QLabel *label = new QLabel("No data available", this);
+            selectedLayout->addWidget(label);
+        }
+
+        selectedScrollWidget->setLayout(selectedLayout);
+        ui->scrollArea_selected_column->setWidget(selectedScrollWidget);
+
+        // === 绘制图表（使用颜色映射）===
+        DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+        DrawPlot::drawSelectedLineChart(ui->plot_original, rawData, columnColors);
+
+    } catch (const std::exception& e) {
+        qDebug() << "Error in loadDatasetAndUpdateLine:" << e.what();
+        throw; // 重新抛出给上层处理
+    } catch (...) {
+        qDebug() << "Unknown error in loadDatasetAndUpdateLine";
+        throw std::runtime_error("Unknown error occurred while loading dataset");
+    }
+}
+
+
+void MainWindow::initDatasetComboBox()
+{
+    try {
+        selectedFolder = R"(E:\QTProgram\QT-FlyDataVisual_AnomalyDetection\time_series_visualization_01\data\Processed_Flydata)";
+        QDir dir(selectedFolder);
+
+        // 检查目录是否存在
+        if (!dir.exists()) {
+            throw std::runtime_error("Selected folder does not exist: " + selectedFolder.toStdString());
+        }
+
+        QStringList csvFiles = dir.entryList(QStringList() << "*.csv", QDir::Files);
+
+        ui->comboBox_datasets->clear();
+        ui->comboBox_datasets->addItems(csvFiles);
+
+        if (!csvFiles.isEmpty()) {
+            // 默认显示第一个文件
+            ui->comboBox_datasets->setCurrentIndex(5);
+            qDebug() << "Processed_Flydata 文件名：" << csvFiles[5];
+            loadDatasetAndUpdateLine(csvFiles[5]);
+        } else {
+            qWarning() << "No CSV files found in directory:" << selectedFolder;
+            QMessageBox::warning(this, "Warning", "No CSV files found in the selected directory");
+        }
+
+    } catch (const std::exception& e) {
+        qDebug() << "Error in initDatasetComboBox:" << e.what();
+        QMessageBox::critical(this, "Error", QString("Failed to initialize dataset combo box: %1").arg(e.what()));
+    } catch (...) {
+        qDebug() << "Unknown error in initDatasetComboBox";
+        QMessageBox::critical(this, "Error", "An unknown error occurred while initializing dataset combo box");
+    }
+}
+//void MainWindow::drawSelectedLine()
 //{
-//    ui->label->hide();
-//    QElapsedTimer timer; // 创建一个计时器实例
+//    // 绑定滑杆(ui->horizontalSlider_k、ui->horizontalSlider_alpha)和参数(k、alpha)，这个参数用于文本标签（ui->label_k_num、ui->label_alpha_num）与图像选择线条的数量（选择k个线条、平衡参数alpha）
 
+//    // 设置数据集选择框(ui->comboBox_datasets中设置为E:\QTProgram\QT-FlyDataVisual_AnomalyDetection\time_series_visualization_01\data\Processed_Flydata文件夹下的csv名称供选择)
 
-//    // 文件地址
-//    QString filePath = ":/td10000000";  // 确保这个路径是正确的
+//    // 选择数据后，根据“文件名”导入数据（局部变量Qvector<Qvector<double>> rawdata）
 
-//    // 检查是否选择了文件
-//    if (!filePath.isEmpty())
-//    {
-//        QFile csvFile(filePath);
-//        qDebug() << filePath << "文件不为空" << endl;
-//        if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
-//        {
-//            qDebug() << "无法打开 CSV 文件：" << csvFile.errorString();
-//            return;
-//        }
+//    // 使用随机选择数据算法函数 选数据到 selectedata（Qvector<Qvector<double>>）
 
-//        QVector<double> value; // 只保留value向量
-//        bool firstLine = true; // 标记是否为第一行
+//    // 将选到的数据的列名放进 ui->scrollArea_selected_column
 
-//        QTextStream in(&csvFile);
-//        while (!in.atEnd())
-//        {
-//            QString line = in.readLine();  // 逐行读取文件内容
-//            if (firstLine) { // 跳过第一行
-//                firstLine = false;
-//                continue;
-//            }
+//    // 绘图到 customPlot = qobject_cast<QCustomPlot*>(ui->plot_representative);和ui->plot_original
 
-//            QStringList fields = line.split(",");  // 假设数据是以逗号分隔的
-
-//            // 确保每行有至少一个数值（即value）
-//            if (fields.size() >= 2)
-//            {
-//                bool ok;
-//                double val = fields[1].toDouble(&ok); // 直接获取第二个字段作为value
-
-//                if (ok)  // 如果转换成功
-//                {
-//                    value.append(val);
-//                }
-//            }
-//        }
-
-//        csvFile.close();
-//        timer.start(); // 开始计时
-//        // 创建折线图
-//        QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(ui->pageLarge);
-//        if (customPlot)
-//        {
-//            // 清除之前的图
-//            customPlot->clearGraphs();
-//            customPlot->resize(1500, 600);
-
-//            // 使用索引作为x轴数据
-//            QVector<double> index(value.size());
-//            std::iota(index.begin(), index.end(), 1); // 生成1, 2, 3, ...
-
-
-//            // 添加折线图并设置数据:
-//            customPlot->addGraph();
-//            customPlot->graph(0)->setData(index, value);
-
-//            // 设置坐标轴标签:
-//            customPlot->xAxis->setLabel("Index");
-//            customPlot->yAxis->setLabel("Value");
-
-//            // 设置坐标轴范围:
-//            customPlot->xAxis->setRange(*std::min_element(index.constBegin(), index.constEnd()), *std::max_element(index.constBegin(), index.constEnd())); // 使用自动生成的索引范围
-//            customPlot->yAxis->setRange(*std::min_element(value.constBegin(), value.constEnd()), *std::max_element(value.constBegin(), value.constEnd())); // 使用 y 向量中的最小和最大值作为范围
-
-//            // 设置一些基本的customPlot配置：
-//            customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
-//            customPlot->axisRect()->setupFullAxesBox(); // 四边安装轴并显示
-//            customPlot->rescaleAxes();// 轴范围调整
-//            customPlot->replot();//刷新图像
-//        }
-
-//        // 计算并输出经过的时间
-//        qDebug() << "td10000000 大规模数据 绘制图表所需的时间:" << timer.elapsed() << "毫秒";
-//    }
 //}
 
 QChartView* MainWindow::createChartView(QPieSeries *series, const QString& title)

@@ -7,7 +7,7 @@
  * @param xdata: columnData的时间列
  * @param ydata: columnData的展示列
  */
-void DrawPlot::drawLineChart(QCustomPlot* Plot, const QVector<QString>& xdata,const QVector<QString>& ydata)
+void DrawPlot::drawSingleLineChart(QCustomPlot* Plot, const QVector<QString>& xdata,const QVector<QString>& ydata)
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(Plot);
     if (customPlot)
@@ -238,7 +238,7 @@ void DrawPlot::drawBoxPlot(QCustomPlot* Plot, const QVector<QString>& xdata,cons
 
 
 
-void DrawPlot::drawLineChartByDB(QCustomPlot* Plot, const QVector<double> &xdata, const QVector<double> &ydata, QString xColumnName, QString yColumnName)
+void DrawPlot::drawSingleLineChartByDB(QCustomPlot* Plot, const QVector<double> &xdata, const QVector<double> &ydata, QString xColumnName, QString yColumnName)
 {
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(Plot);
     if (customPlot)
@@ -384,6 +384,73 @@ void DrawPlot::drawBoxPlotByDB(QCustomPlot* Plot,  const QVector<double> &ydata,
         customPlot->replot();
     }
 }
+
+void DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
+{
+    QCustomPlot* plot = qobject_cast<QCustomPlot*>(Plot);
+    if (!plot || myData.isEmpty()) return;
+    plot->clearGraphs();
+
+    for (int i = 0; i < myData.size(); ++i) {
+        // 跳过空列
+        if (myData[i].isEmpty()) continue;
+
+        // 提取列名（第一个元素）
+        QString columnName = myData[i][0];
+
+        // 处理数据：跳过列名，将字符串转为double
+        QVector<double> yData;
+        for (int j = 1; j < myData[i].size(); ++j) {
+            bool ok;
+            double value = myData[i][j].toDouble(&ok);
+            if (ok) {
+                yData.append(value);
+            } else {
+                // 处理转换失败的情况
+                qWarning() << "数据转换失败: " << myData[i][j];
+                yData.append(0); // 或者使用NaN表示无效数据
+            }
+        }
+
+        // 如果没有有效数据，跳过该列
+        if (yData.isEmpty()) continue;
+
+        // 创建X轴数据（使用索引作为X值）
+        QVector<double> xData(yData.size());
+        for (int j = 0; j < xData.size(); ++j) {
+            xData[j] = j; // X值为数据点索引（从0开始）
+        }
+
+        // 添加图形并设置数据
+        int graphIndex = plot->graphCount();
+        plot->addGraph();
+        plot->graph(graphIndex)->setData(xData, yData);
+
+        // 设置线条颜色和样式：优先使用map中的颜色，没有则使用默认
+        QColor color;
+        if (columnColors.contains(columnName)) {
+            color = columnColors[columnName];
+        } else {
+            // 如果map中没有该列的颜色，使用默认的HSV颜色
+            color.setHsv((i * 40) % 360, 200, 255);
+        }
+        plot->graph(graphIndex)->setPen(QPen(color, 2));
+
+        // 设置图例名称（使用列名）
+        plot->graph(graphIndex)->setName(columnName);
+    }
+
+//    // 设置图例可见
+//    plot->legend->setVisible(true);
+
+    // 调整坐标轴范围以适应数据
+    plot->rescaleAxes();
+
+    // 重绘图表
+    plot->replot();
+}
+
+
 
 // 滑动平均函数：步长等于窗口大小
 void DrawPlot::applySlidingAverageWithStep(const QVector<double>& x, const QVector<double>& y, int windowSize, QVector<double>& smoothedX, QVector<double>& smoothedY)

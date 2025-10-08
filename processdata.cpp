@@ -1,8 +1,6 @@
 // processdata.cpp
 #include "processdata.h"
 
-
-
 QVector<double> ProcessData::preprocessDatatoDB(const QVector<QString>& xdata, const QVector<QString>& ydata, double epsilon)
 {
     // 数据处理为时间序列，即时间间隔相等，0.2s每个时间片
@@ -161,7 +159,7 @@ void ProcessData::processThreeData(const QVector<QString>& time, const QVector<Q
 }
 
 //间隔采样，如果间隔宽度是10000的倍数，采样结果会是周期的折线。
-std::pair<QVector<double>, QVector<double>> ProcessData::intervalSampling(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints)
+std::pair<QVector<double>, QVector<double>> ProcessData::intervalSample(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints)
 {
     std::pair<QVector<double>, QVector<double>> sampledData;
     int originalSize = timeSeconds.size();
@@ -189,7 +187,7 @@ std::pair<QVector<double>, QVector<double>> ProcessData::intervalSampling(const 
 }
 
 // 均匀采样
-std::pair<QVector<double>, QVector<double>> ProcessData::intervalAverageSampling(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints)
+std::pair<QVector<double>, QVector<double>> ProcessData::intervalAverageSample(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints)
 {
     std::pair<QVector<double>, QVector<double>> sampledData;
     int originalSize = timeSeconds.size();
@@ -232,7 +230,7 @@ std::pair<QVector<double>, QVector<double>> ProcessData::intervalAverageSampling
 }
 
 //min-max 聚合
-std::pair<QVector<double>, QVector<double>> ProcessData::maxMinSampling(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
+std::pair<QVector<double>, QVector<double>> ProcessData::maxMinSample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
 {
     std::pair<QVector<double>, QVector<double>> sampledData;
     int originalSize = timeSeconds.size();
@@ -277,7 +275,7 @@ std::pair<QVector<double>, QVector<double>> ProcessData::maxMinSampling(const QV
     return sampledData;
 }
 // M4 聚合
-std::pair<QVector<double>, QVector<double>> ProcessData::m4Sampling(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
+std::pair<QVector<double>, QVector<double>> ProcessData::m4Sample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
 {
     std::pair<QVector<double>, QVector<double>> sampledData;
     int originalSize = timeSeconds.size();
@@ -330,4 +328,184 @@ std::pair<QVector<double>, QVector<double>> ProcessData::m4Sampling(const QVecto
     }
 
     return sampledData;
+}
+
+// DTW 距离计算
+double ProcessData::dtwDistanceFast(const QVector<double>& seq1,
+                                    const QVector<double>& seq2,
+                                    int window)
+{
+    int n = seq1.size();
+    int m = seq2.size();
+
+    if (n == 0 || m == 0) {
+        throw std::invalid_argument("Input sequences must not be empty.");
+    }
+
+    // 确保窗口大小至少覆盖 |n-m|
+    int w = std::max(window, std::abs(n - m));
+
+    QVector<QVector<double>> dp(n + 1, QVector<double>(m + 1, std::numeric_limits<double>::infinity()));
+    dp[0][0] = 0.0;
+
+    for (int i = 1; i <= n; ++i) {
+        int jStart = std::max(1, i - w);
+        int jEnd = std::min(m, i + w);
+        for (int j = jStart; j <= jEnd; ++j) {
+            double cost = std::abs(seq1[i - 1] - seq2[j - 1]);
+            dp[i][j] = cost + std::min({dp[i - 1][j],     // 上
+                                        dp[i][j - 1],     // 左
+                                        dp[i - 1][j - 1]  // 左上
+                                       });
+        }
+    }
+
+    return dp[n][m];
+}
+
+// 计算全局 DTW 矩阵
+QVector<QVector<double>> ProcessData::computeDtwMatrix(const QVector<QVector<double>>& data,
+                                                       int window)
+{
+    int n = data.size();
+    QVector<QVector<double>> distanceMatrix(n, QVector<double>(n, 0.0));
+
+    for (int i = 0; i < n; ++i) {
+        for (int j = i + 1; j < n; ++j) {
+            double dist = dtwDistanceFast(data[i], data[j], window);
+            distanceMatrix[i][j] = dist;
+            distanceMatrix[j][i] = dist; // 对称
+        }
+    }
+
+    return distanceMatrix;
+}
+
+// 计算平均距离数组
+QVector<QVector<double>> ProcessData::computeAverageMatrix(const QVector<QVector<double>>& dtwMatrix)
+{
+    int n = dtwMatrix.size();
+    QVector<QVector<double>> avgDistances(1, QVector<double>(n, 0.0));
+
+    for (int i = 0; i < n; ++i) {
+        double total = 0.0;
+        for (int j = 0; j < n; ++j) {
+            total += dtwMatrix[i][j];
+        }
+        avgDistances[0][i] = (n > 1) ? total / (n - 1) : 0.0;
+    }
+
+    return avgDistances;
+}
+
+QVector<QVector<double>> ProcessData::greedySelect(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, int alpha)
+{
+    int n = data.size();
+    QVector<QVector<double>> result;   // 最终返回的代表性时序数据
+
+    // ==== 安全检查 ====
+    if (n == 0 || k == 0) {
+        return result;
+    }
+    if (dtwMatrix.size() != n || averageMatrix.size() != n) {
+        throw std::invalid_argument("dtwMatrix 或 averageMatrix 尺寸与 data 不匹配");
+    }
+    for (int i = 0; i < n; i++) {
+        if (dtwMatrix[i].size() != n) {
+            throw std::invalid_argument("dtwMatrix 必须是 n×n 矩阵");
+        }
+    }
+
+    // ==== Step 1: 选择第一个代表 ====
+    int firstRep = 0;
+    double minAvg = std::numeric_limits<double>::max();
+    for (int i = 0; i < n; i++) {
+        if (averageMatrix[i] < minAvg) {
+            minAvg = averageMatrix[i];
+            firstRep = i;
+        }
+    }
+    QVector<int> representatives;
+    representatives.append(firstRep);
+
+    // 初始化候选集
+    QVector<int> remainingIndices;
+    for (int i = 0; i < n; i++) {
+        if (i != firstRep) remainingIndices.append(i);
+    }
+
+    QVector<double> currentMinDistances(n);
+    for (int i = 0; i < n; i++) {
+        currentMinDistances[i] = dtwMatrix[i][firstRep];
+    }
+
+    double minRepDistances = -std::numeric_limits<double>::max();
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dtwMatrix[i][j] > minRepDistances) {
+                minRepDistances = dtwMatrix[i][j];
+            }
+        }
+    }
+
+    // ==== Step 2: 迭代选择剩余代表 ====
+    for (int iter = 0; iter < k - 1; iter++) {
+        double maxScore = -std::numeric_limits<double>::infinity();
+        int bestC = -1;
+
+        for (int c : remainingIndices) {
+            // ---- Diversity Gain ----
+            double minDistToRep = std::numeric_limits<double>::max();
+            for (int r : representatives) {
+                if (dtwMatrix[c][r] < minDistToRep) {
+                    minDistToRep = dtwMatrix[c][r];
+                }
+            }
+            double diversityGain = qMin(minDistToRep, minRepDistances);
+            diversityGain = qMax(diversityGain, 1e-10); // 避免 log(0)
+            double diversityGainComponent = alpha * log10(diversityGain);
+
+            // ---- Coverage Gain ----
+            double coverageSum = 0.0;
+            for (int i = 0; i < n; i++) {
+                double delta = qMin(currentMinDistances[i], dtwMatrix[i][c]);
+                coverageSum += delta;
+            }
+            double coverageGain = coverageSum / n;
+            double coverageGainComponent = -(1.0 - alpha) * log10(coverageGain);
+
+            // ---- 综合得分 ----
+            double score = diversityGainComponent + coverageGainComponent;
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestC = c;
+            }
+        }
+
+        if (bestC == -1) break; // 出错保护
+
+        // 更新
+        double newMinRep = std::numeric_limits<double>::max();
+        for (int r : representatives) {
+            if (dtwMatrix[bestC][r] < newMinRep) {
+                newMinRep = dtwMatrix[bestC][r];
+            }
+        }
+        minRepDistances = qMin(minRepDistances, newMinRep);
+
+        for (int i = 0; i < n; i++) {
+            currentMinDistances[i] = qMin(currentMinDistances[i], dtwMatrix[i][bestC]);
+        }
+
+        representatives.append(bestC);
+        remainingIndices.removeOne(bestC);
+    }
+
+    // ==== Step 3: 把索引转成数据 ====
+    for (int idx : representatives) {
+        result.append(data[idx]);
+    }
+
+    return result;
 }
