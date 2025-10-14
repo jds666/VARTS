@@ -1,0 +1,7 @@
+{
+  "StatusBar": {
+    "SplittingDataset": "正在拆分数据集...",
+    "SplitDone": "数据集拆分完成！",
+    "SplitError": "拆分失败，请检查文件格式。"
+  }
+}

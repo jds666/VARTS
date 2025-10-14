@@ -1,0 +1,7 @@
+{
+  "StatusBar": {
+    "SplittingDataset": "Splitting dataset...",
+    "SplitDone": "Dataset split completed!",
+    "SplitError": "Failed to split dataset. Please check the file format."
+  }
+}
