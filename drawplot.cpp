@@ -442,6 +442,8 @@ void DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QS
 
 //    // 设置图例可见
 //    plot->legend->setVisible(true);
+    plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+    plot->axisRect()->setupFullAxesBox();
 
     // 调整坐标轴范围以适应数据
     plot->rescaleAxes();

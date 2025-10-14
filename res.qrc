@@ -19,5 +19,7 @@
         <file alias="td100000">Temperature_data_100000.csv</file>
         <file alias="td1000000">Temperature_data_1000000.csv</file>
         <file alias="td10000000">Temperature_data_10000000.csv</file>
+        <file>config/lang_zh_CN.json</file>
+        <file>config/lang_en_US.json</file>
     </qresource>
 </RCC>

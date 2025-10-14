@@ -24,6 +24,8 @@ MainWindow::MainWindow(QWidget *parent)
     {
         qDebug() << "数据库连接失败";
     }
+    // 语言加载
+    Util::loadLanguageFile("zh_CN"); // 默认中文，可改成 "en_US" 切换英文
 
     //列名分类
     numColumn = {"俯仰角", "滚转角", "航迹角", "俯仰角速度", "滚转角速度", "偏航角速度", "飞行时间", "升降舵反馈", "左副翼舵反馈", "右副翼舵反馈", "方向舵反馈",
@@ -62,7 +64,7 @@ MainWindow::MainWindow(QWidget *parent)
     //设置标题
 
     setWindowTitle("FlyTsViz");
-//    resize(2400,1000);
+
     setWindowIcon(QIcon(":/visual"));
     ui->speedlabel->setAlignment(Qt::AlignCenter);  // 设置居中对齐
     ui->horizontalSlider->setRange(1, 100);  // 设置范围
@@ -107,8 +109,8 @@ MainWindow::MainWindow(QWidget *parent)
 
     //滑杆绑定
     connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::handleSpeedValueChanged);
-    connect(ui->horizontalSlider_k, &QSlider::valueChanged, this, &MainWindow::handleSelectKValueChanged);
-    connect(ui->horizontalSlider_alpha, &QSlider::valueChanged, this, &MainWindow::handleSelectAlphaValueChanged);
+    connect(ui->horizontalSlider_k, &QSlider::sliderReleased, this, &MainWindow::handleSelectKValueChanged);
+    connect(ui->horizontalSlider_alpha, &QSlider::sliderReleased, this, &MainWindow::handleSelectAlphaValueChanged);
 
     //更换图栈
     ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->single_line));
@@ -155,6 +157,8 @@ MainWindow::MainWindow(QWidget *parent)
     drawLargeLine();
     initDatasetComboBox();
 
+
+
     // 更换下拉框内容
     connect(ui->comboBox, SIGNAL(activated(int)), this, SLOT(onComboBoxIndexChanged()));
     connect(ui->comboBox_datasets, SIGNAL(activated(int)), this, SLOT(onComboBoxDatasetChanged()));
@@ -166,12 +170,6 @@ MainWindow::MainWindow(QWidget *parent)
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::updateLineChart);
 
-//    // 开始停止按钮
-//    ui->playPauseButton->setIcon(QIcon(":/play"));
-//    connect(ui->playPauseButton, &QPushButton::clicked, this, &MainWindow::onPlayPauseButtonClicked);
-//    //重新开始按钮
-//    ui->restartButton->setIcon(QIcon(":/restart"));
-//    connect(ui->restartButton, &QPushButton::clicked, this, &MainWindow::onRestartButtonClicked);
     // 开始停止按钮
     QIcon playIcon(":/play");
     QSize playButtonSize = ui->playPauseButton->size(); // 获取按钮的大小
@@ -194,6 +192,9 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->action_OpenGauss,&QAction::triggered, this, &MainWindow::handleActionDatabaseTriggered);
     QObject::connect(ui->action_Txt,&QAction::triggered, this, &MainWindow::handleActionTxtTriggered);
 
+    // 数据分列功能绑定
+    QObject::connect(ui->action_Column_Type_Splitter, &QAction::triggered, this, &MainWindow::handleColumnTypeSplitterTriggered);
+
     // 帮助按钮
     QObject::connect(ui->actionhttps_doc_qt_io, &QAction::triggered, this,[]() { // Lambda 表达式
         QUrl url("https://doc.qt.io/");
@@ -210,9 +211,6 @@ MainWindow::~MainWindow()
 {
     delete ui;
 }
-// 以下是自定义函数
-
-
 
 QVector<float> doubleQvectortoFloatQvector(const QVector<double>& doubleData) {
     QVector<float> floatData;
@@ -222,80 +220,6 @@ QVector<float> doubleQvectortoFloatQvector(const QVector<double>& doubleData) {
     return floatData;
 }
 
-//void MainWindow::updateLineChart1()
-//{
-//    if(ui->comboBox->currentText().isEmpty())
-//    {
-//        ui->statusbar->showMessage("Selection Box is Empty");
-//        return;
-//    }
-//    else
-//    {
-//        QVector<QString> xdata,ydata;
-//        // "飞行时间" 列
-//        xdata = getColumnDataByColumnName("飞行时间");
-//        // 当前选择列
-//        ydata = getColumnDataByColumnName(ui->comboBox->currentText());
-//        QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(ui->single_line);
-//        if (customPlot)
-//        {
-//            // 准备绘图数据:
-//            ui->statusbar->showMessage("Drawing Dynamic Line Chart  " + QString::number(timeStart/5) + " seconds");
-
-
-//            QVector<double> x, y;
-//            double epsilon=0.1; //误差小于0.1说明0.1秒之内的数据，直接取平均
-//            //数据处理
-//            ProcessData::processData(xdata,ydata,epsilon,x,y);
-
-//            if (timeStart < x.size() - timeSize)
-//            {
-//                QVector<double> x_temp(timeSize), y_temp(timeSize);
-//                if(timeStart < timeSize)
-//                {
-//                    x_temp = x.mid(0, timeSize);
-
-//                    // 使用 NaN 填充前部分
-//                    for (int i = 0; i < timeSize - timeStart; ++i) {
-//                        y_temp[i] = std::numeric_limits<double>::quiet_NaN();
-//                    }
-
-//                    // 填充顺序值在后部分
-//                    // 使用 y[0] 到 y[timeSize] 填充指定范围
-//                    std::copy(y.begin(), y.begin() + timeStart, y_temp.begin() + timeSize - timeStart);
-//                }
-//                else
-//                {
-//                    x_temp = x.mid(timeStart, timeSize); // 提取 x[timeStart] 到 x[timeStart+timeSize]
-//                    y_temp = y.mid(timeStart, timeSize); // 提取 y[timeStart] 到 y[timeStart+timeSize]
-//                }
-
-//                customPlot->addGraph();
-//                customPlot->graph(0)->setData(x_temp, y_temp);
-
-//                // 设置坐标轴标签:
-//                customPlot->xAxis->setLabel("Time");
-//                customPlot->yAxis->setLabel(ydata[0]);
-
-//                // 设置坐标轴范围:
-//                customPlot->xAxis->setRange(*std::min_element(x_temp.constBegin(), x_temp.constEnd()), *std::max_element(x_temp.constBegin(), x_temp.constEnd())); // 使用 x_temp 向量中的最小和最大值作为范围
-//                //不显示x坐标
-//                customPlot->xAxis->setTickLabels(false); // 设置刻度标签不可见
-//                customPlot->yAxis->setRange(*std::min_element(y_temp.constBegin(), y_temp.constEnd()), *std::max_element(y_temp.constBegin(), y_temp.constEnd())); // 使用 y_temp 向量中的最小和最大值作为范围
-
-//                // 重新绘制折线图:
-//                customPlot->replot();
-
-//                timeStart = timeStart + playSpeed;
-//            }
-//            else
-//            {
-//                // 绘图完成，停止定时器
-//                timer->stop();
-//            }
-//        }
-//    }
-//}
 void MainWindow::updateLineChart()
 {
     if(ui->comboBox->currentText().isEmpty()&&checkedCheckBoxList.size()==0)
@@ -509,13 +433,30 @@ void MainWindow::handleSelectKValueChanged()
 {
     selectedK = ui->horizontalSlider_k->value();
     ui->label_k_num->setText(QString::number(selectedK));
+
+    if (!rawData.isEmpty()) {
+        QTimer::singleShot(200, this, [this]() {
+            selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
+            updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
+            DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+        });
+    }
 }
 
 void MainWindow::handleSelectAlphaValueChanged()
 {
     selectedAlpha = ui->horizontalSlider_alpha->value() / 100.0;
     ui->label_alpha_num->setText(QString::number(selectedAlpha, 'f', 2));
+
+    if (!rawData.isEmpty()) {
+        QTimer::singleShot(200, this, [this]() {
+            selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
+            updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
+            DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+        });
+    }
 }
+
 
 void MainWindow::handleCheckBoxStateChanged(int state)
 {
@@ -1147,6 +1088,21 @@ void MainWindow::handleActionTxtTriggered()
         }
     }
 }
+
+void MainWindow::handleColumnTypeSplitterTriggered()
+{
+    ui->statusbar->showMessage(Util::getText("StatusBar", "SplittingDataset"));
+
+    QString filePath = QFileDialog::getOpenFileName(this, "选择 CSV 文件", "", "CSV 文件 (*.csv)");
+    if (filePath.isEmpty())
+        return;
+
+    Util::splitCsvByColumnType(filePath);
+
+    ui->statusbar->showMessage(Util::getText("StatusBar", "SplitDone"));
+
+}
+
 
 void MainWindow::onComboBoxIndexChanged()
 {
@@ -2030,21 +1986,74 @@ void MainWindow::drawLargeLine()
         qDebug()<<filePath << " 绘制图表 执行时间:" << timer.elapsed() << "毫秒";
     }
 }
+void MainWindow::updateColumnScrollArea(QScrollArea* scrollArea,
+                                        const QVector<QVector<QString>>& data,
+                                        const QMap<QString, QColor>& colorMap,
+                                        const QString& emptyText)
+{
+    // 清理旧内容
+    QWidget *oldWidget = scrollArea->widget();
+    if (oldWidget) oldWidget->deleteLater();
+
+    QWidget *scrollWidget = new QWidget;
+    QVBoxLayout *layout = new QVBoxLayout(scrollWidget);
+
+    if (!data.isEmpty()) {
+        for (int c = 0; c < data.size(); ++c) {
+            if (!data[c].isEmpty()) {
+                QString columnName = data[c][0];
+                QLabel *label = new QLabel(columnName, this);
+
+                // 设置标签颜色
+                if (colorMap.contains(columnName)) {
+                    QPalette palette = label->palette();
+                    palette.setColor(QPalette::WindowText, colorMap[columnName]);
+                    label->setPalette(palette);
+                }
+
+                layout->addWidget(label);
+            }
+        }
+    } else {
+        QLabel *label = new QLabel(emptyText, this);
+        layout->addWidget(label);
+    }
+
+    scrollWidget->setLayout(layout);
+    scrollArea->setWidget(scrollWidget);
+}
+
 void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
 {
     try {
         if (selectedFile.isEmpty()) return;
 
-        QString filePath = selectedFolder + "/" + selectedFile;
-        QVector<QVector<QString>> rawData = Util::readCSVWithColumnNames(filePath);
+        currentFile = selectedFolder + "/" + selectedFile;
+        rawData = Util::readCSVWithColumnNames(currentFile);
 
         // 检查数据是否为空
         if (rawData.isEmpty()) {
             throw std::runtime_error("Loaded dataset is empty");
         }
 
+        // 移除"飞行时间"相关列
+        for (int i = 0; i < rawData.size(); ) {
+            if (rawData[i].isEmpty()) {
+                i++;  // 空列直接跳过
+                continue;
+            }
+
+            QString columnName = rawData[i][0];
+            // 匹配需要移除的列名
+            if (columnName == "FXSJ" || columnName == "飞行时间" || columnName == "flightTime") {
+                rawData.remove(i);  // 移除后i不变，因为下一个元素会移到当前位置
+            } else {
+                i++;  // 不匹配则移动到下一列
+            }
+        }
+
         // === 1. 创建列名与颜色的映射（使用HSV色轮）===
-        QMap<QString, QColor> columnColors;
+        columnColors.clear();
         int totalColumns = rawData.size();
         const int HUE_STEP = 40; // 固定步长，保持颜色差异明显
         for (int i = 0; i < totalColumns; ++i) {
@@ -2063,75 +2072,18 @@ void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
                 }
 
                 columnColors[columnName] = color;
+                qDebug() << "列名: "<<columnName<< "颜色: "<<color;
             }
         }
 
-        // 随机选择最多5列（如果总列数不足5则选全部）
+        // 选择最多5列（如果总列数不足5则选全部）
         int selectCount = qMin(5, totalColumns);
-        QVector<QVector<QString>> selectedData = Util::randomSelectColumns(rawData, selectCount);
+        int initAlpha = 0;
+        selectedData = Util::M4GreedySelectColumns(rawData, selectCount, initAlpha);
+//      selectedData = Util::randomSelectColumns(rawData, selectCount);
 
-        // === 清理旧内容 ===
-        // 清理选中列的scrollArea
-        QWidget *oldSelectedWidget = ui->scrollArea_selected_column->widget();
-        if (oldSelectedWidget) oldSelectedWidget->deleteLater();
-
-        // 清理原始列的scrollArea
-        QWidget *oldOriginalWidget = ui->scrollArea_original_column->widget();
-        if (oldOriginalWidget) oldOriginalWidget->deleteLater();
-
-        // === 2. 显示原始列名到scrollArea_original_column（带颜色） ===
-        QWidget *originalScrollWidget = new QWidget;
-        QVBoxLayout *originalLayout = new QVBoxLayout(originalScrollWidget);
-        for (int c = 0; c < rawData.size(); ++c) {
-            if (!rawData[c].isEmpty()) {
-                QString columnName = rawData[c][0];
-                QLabel *label = new QLabel(columnName, this);
-                // 设置标签颜色为映射中的颜色
-                if (columnColors.contains(columnName)) {
-                    QPalette palette = label->palette();
-                    palette.setColor(QPalette::WindowText, columnColors[columnName]);
-                    label->setPalette(palette);
-                }
-                originalLayout->addWidget(label);
-            }
-        }
-        originalScrollWidget->setLayout(originalLayout);
-        ui->scrollArea_original_column->setWidget(originalScrollWidget);
-
-        // === 3. 显示选中列名到scrollArea_selected_column（带颜色）===
-        QWidget *selectedScrollWidget = new QWidget;
-        QVBoxLayout *selectedLayout = new QVBoxLayout(selectedScrollWidget);
-
-        if (!selectedData.isEmpty()) {
-            int colCount = selectedData.size();
-            qDebug() << "随机选中的列数: "<<colCount;
-
-            for (int c = 0; c < colCount; ++c) {
-                if (c < selectedData.size() && !selectedData[c].isEmpty()) {
-                    QString columnName = selectedData[c][0];
-                    QLabel *label = new QLabel(columnName, this);
-                    qDebug() << "第"<<c<<"行列名: "<<columnName;
-
-                    // 设置标签颜色为映射中的颜色
-                    if (columnColors.contains(columnName)) {
-                        QPalette palette = label->palette();
-                        palette.setColor(QPalette::WindowText, columnColors[columnName]);
-                        label->setPalette(palette);
-                    }
-
-                    selectedLayout->addWidget(label);
-                } else {
-                    QLabel *label = new QLabel("N/A", this);
-                    selectedLayout->addWidget(label);
-                }
-            }
-        } else {
-            QLabel *label = new QLabel("No data available", this);
-            selectedLayout->addWidget(label);
-        }
-
-        selectedScrollWidget->setLayout(selectedLayout);
-        ui->scrollArea_selected_column->setWidget(selectedScrollWidget);
+        updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
+        updateColumnScrollArea(ui->scrollArea_original_column, rawData, columnColors);
 
         // === 绘制图表（使用颜色映射）===
         DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
@@ -2164,10 +2116,10 @@ void MainWindow::initDatasetComboBox()
         ui->comboBox_datasets->addItems(csvFiles);
 
         if (!csvFiles.isEmpty()) {
-            // 默认显示第一个文件
-            ui->comboBox_datasets->setCurrentIndex(5);
-            qDebug() << "Processed_Flydata 文件名：" << csvFiles[5];
-            loadDatasetAndUpdateLine(csvFiles[5]);
+            // 默认显示第5个文件
+            int defaultIndex = qMin(5, csvFiles.size() - 1);
+            ui->comboBox_datasets->setCurrentIndex(defaultIndex);
+            loadDatasetAndUpdateLine(csvFiles[defaultIndex]);
         } else {
             qWarning() << "No CSV files found in directory:" << selectedFolder;
             QMessageBox::warning(this, "Warning", "No CSV files found in the selected directory");

@@ -24,8 +24,9 @@ public:
     // 代表数据选择
     static double dtwDistanceFast(const QVector<double>& seq1, const QVector<double>& seq2, int window = 10);
     static QVector<QVector<double>> computeDtwMatrix(const QVector<QVector<double>>& data, int window = 10);
-    static QVector<QVector<double>> computeAverageMatrix(const QVector<QVector<double>>& dtwMatrix);
-    static QVector<QVector<double>> greedySelect(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, int alpha);
+    static QVector<double> computeAverageMatrix(const QVector<QVector<double>>& dtwMatrix);
+    static QVector<QVector<double>> greedySelect(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, double alpha);
+    static QVector<int> greedySelectIndices(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, double alpha);
 };
 
 #endif // PROCESSDATA_H

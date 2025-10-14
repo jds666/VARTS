@@ -71,9 +71,6 @@ private:
     bool isPlaying = false;
     int playSpeed = 1;
     QTimer *timer = nullptr;
-    int selectedK = 0;
-    double selectedAlpha = 0.0;
-    QString selectedFolder;
 
     // 数据类型分类
     QSet<QString> textColumn;
@@ -85,6 +82,15 @@ private:
     QVBoxLayout* lineChartLayout = nullptr;
     QCPItemText* tracerXText = nullptr;
     QCPItemTracer* tracer = nullptr;
+
+    //代表选择界面相关全局变量
+    QVector<QVector<QString>> rawData;     // 存放当前加载的数据集
+    QVector<QVector<QString>> selectedData; // 当前选中的代表列
+    QMap<QString, QColor> columnColors;    // 列名到颜色的映射
+    QString currentFile;                   // 当前选中的文件
+    int selectedK = 5;
+    double selectedAlpha = 0.0;
+    QString selectedFolder;
 
     // 拖动相关
     bool m_dragging = false;
@@ -99,13 +105,17 @@ private:
     QCustomPlot* createLineChart(const QString& yText);
     QChartView* createChartView(QPieSeries *series, const QString& title);
     QMap<QString, int> classifyDataByColumnName(QString ColumnName);
-
+    void updateColumnScrollArea(QScrollArea* scrollArea,
+                                            const QVector<QVector<QString>>& data,
+                                            const QMap<QString, QColor>& colorMap,
+                                            const QString& emptyText = "No data available");
 private slots:
     // 槽函数（内部信号响应）
     void handleActionExcelTriggered();
     void handleActionDatabaseTriggered();
     void handleActionCsvTriggered();
     void handleActionTxtTriggered();
+    void handleColumnTypeSplitterTriggered();
 
     void onComboBoxIndexChanged();
     void onComboBoxDatasetChanged();

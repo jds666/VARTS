@@ -382,23 +382,26 @@ QVector<QVector<double>> ProcessData::computeDtwMatrix(const QVector<QVector<dou
 }
 
 // 计算平均距离数组
-QVector<QVector<double>> ProcessData::computeAverageMatrix(const QVector<QVector<double>>& dtwMatrix)
+QVector<double> ProcessData::computeAverageMatrix(const QVector<QVector<double>>& dtwMatrix)
 {
     int n = dtwMatrix.size();
-    QVector<QVector<double>> avgDistances(1, QVector<double>(n, 0.0));
+    QVector<double> avgDistances(n, 0.0);
+
+    if (n == 0) return avgDistances;
 
     for (int i = 0; i < n; ++i) {
         double total = 0.0;
         for (int j = 0; j < n; ++j) {
             total += dtwMatrix[i][j];
         }
-        avgDistances[0][i] = (n > 1) ? total / (n - 1) : 0.0;
+        // 平均距离（不包括自己）
+        avgDistances[i] = (n > 1) ? total / (n - 1) : 0.0;
     }
 
     return avgDistances;
 }
 
-QVector<QVector<double>> ProcessData::greedySelect(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, int alpha)
+QVector<QVector<double>> ProcessData::greedySelect(const QVector<QVector<double>>& data, const QVector<QVector<double>>& dtwMatrix, const QVector<double>& averageMatrix, int k, double alpha)
 {
     int n = data.size();
     QVector<QVector<double>> result;   // 最终返回的代表性时序数据
@@ -508,4 +511,115 @@ QVector<QVector<double>> ProcessData::greedySelect(const QVector<QVector<double>
     }
 
     return result;
+}
+
+QVector<int> ProcessData::greedySelectIndices(
+    const QVector<QVector<double>>& data,
+    const QVector<QVector<double>>& dtwMatrix,
+    const QVector<double>& averageMatrix,
+    int k,
+    double alpha)
+{
+    int n = data.size();
+    QVector<int> representatives;   // 返回的索引
+
+    // ==== 安全检查 ====
+    if (n == 0 || k == 0) {
+        return representatives;
+    }
+    if (dtwMatrix.size() != n || averageMatrix.size() != n) {
+        throw std::invalid_argument("dtwMatrix 或 averageMatrix 尺寸与 data 不匹配");
+    }
+    for (int i = 0; i < n; i++) {
+        if (dtwMatrix[i].size() != n) {
+            throw std::invalid_argument("dtwMatrix 必须是 n×n 矩阵");
+        }
+    }
+
+    // ==== Step 1: 选择第一个代表 ====
+    int firstRep = 0;
+    double minAvg = std::numeric_limits<double>::max();
+    for (int i = 0; i < n; i++) {
+        if (averageMatrix[i] < minAvg) {
+            minAvg = averageMatrix[i];
+            firstRep = i;
+        }
+    }
+    representatives.append(firstRep);
+
+    // 初始化候选集
+    QVector<int> remainingIndices;
+    for (int i = 0; i < n; i++) {
+        if (i != firstRep) remainingIndices.append(i);
+    }
+
+    QVector<double> currentMinDistances(n);
+    for (int i = 0; i < n; i++) {
+        currentMinDistances[i] = dtwMatrix[i][firstRep];
+    }
+
+    double minRepDistances = -std::numeric_limits<double>::max();
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (dtwMatrix[i][j] > minRepDistances) {
+                minRepDistances = dtwMatrix[i][j];
+            }
+        }
+    }
+
+    // ==== Step 2: 迭代选择剩余代表 ====
+    for (int iter = 0; iter < k - 1; iter++) {
+        double maxScore = -std::numeric_limits<double>::infinity();
+        int bestC = -1;
+
+        for (int c : remainingIndices) {
+            // ---- Diversity Gain ----
+            double minDistToRep = std::numeric_limits<double>::max();
+            for (int r : representatives) {
+                if (dtwMatrix[c][r] < minDistToRep) {
+                    minDistToRep = dtwMatrix[c][r];
+                }
+            }
+            double diversityGain = qMin(minDistToRep, minRepDistances);
+            diversityGain = qMax(diversityGain, 1e-10); // 避免 log(0)
+            double diversityGainComponent = alpha * log10(diversityGain);
+
+            // ---- Coverage Gain ----
+            double coverageSum = 0.0;
+            for (int i = 0; i < n; i++) {
+                double delta = qMin(currentMinDistances[i], dtwMatrix[i][c]);
+                coverageSum += delta;
+            }
+            double coverageGain = coverageSum / n;
+            double coverageGainComponent = -(1.0 - alpha) * log10(coverageGain);
+
+            // ---- 综合得分 ----
+            double score = diversityGainComponent + coverageGainComponent;
+
+            if (score > maxScore) {
+                maxScore = score;
+                bestC = c;
+            }
+        }
+
+        if (bestC == -1) break; // 出错保护
+
+        // 更新
+        double newMinRep = std::numeric_limits<double>::max();
+        for (int r : representatives) {
+            if (dtwMatrix[bestC][r] < newMinRep) {
+                newMinRep = dtwMatrix[bestC][r];
+            }
+        }
+        minRepDistances = qMin(minRepDistances, newMinRep);
+
+        for (int i = 0; i < n; i++) {
+            currentMinDistances[i] = qMin(currentMinDistances[i], dtwMatrix[i][bestC]);
+        }
+
+        representatives.append(bestC);
+        remainingIndices.removeOne(bestC);
+    }
+
+    return representatives;
 }

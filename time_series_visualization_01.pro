@@ -26,14 +26,16 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     processdata.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    util.cpp
 
 HEADERS += \
     databasehandler.h \
     drawplot.h \
     mainwindow.h \
     processdata.h \
-    qcustomplot.h
+    qcustomplot.h \
+    util.h
 
 FORMS += \
     linechart.ui \
