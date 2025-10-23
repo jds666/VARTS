@@ -6,7 +6,7 @@
 #include <QString>
 #include <QDebug>
 #include <cmath>
-
+#include "debug.h"
 class ProcessData
 {
 public:

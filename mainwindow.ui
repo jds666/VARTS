@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>886</width>
-    <height>558</height>
+    <width>999</width>
+    <height>648</height>
    </rect>
   </property>
   <property name="font">
@@ -30,7 +30,7 @@
     <item row="2" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>1</number>
+       <number>4</number>
       </property>
       <widget class="QWidget" name="pageLine">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -79,8 +79,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>274</width>
-                 <height>267</height>
+                 <width>304</width>
+                 <height>331</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -163,9 +163,9 @@
             </item>
            </layout>
           </widget>
-          <widget class="QTabWidget" name="tabWidget">
+          <widget class="QTabWidget" name="tab">
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="tab_singal_line">
             <attribute name="title">
@@ -199,8 +199,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>557</width>
-                  <height>395</height>
+                  <width>640</width>
+                  <height>485</height>
                  </rect>
                 </property>
                </widget>
@@ -208,9 +208,40 @@
              </item>
             </layout>
            </widget>
-           <widget class="QCustomPlot" name="pageScatter_2">
+           <widget class="QCustomPlot" name="pageScatter">
+            <attribute name="icon">
+             <iconset>
+              <normaloff>image/scatter.png</normaloff>image/scatter.png</iconset>
+            </attribute>
             <attribute name="title">
-             <string>页</string>
+             <string>Scatter</string>
+            </attribute>
+           </widget>
+           <widget class="QWidget" name="pageThreeD">
+            <attribute name="icon">
+             <iconset>
+              <normaloff>image/3Dscatter.png</normaloff>image/3Dscatter.png</iconset>
+            </attribute>
+            <attribute name="title">
+             <string>Trajectory</string>
+            </attribute>
+           </widget>
+           <widget class="QWidget" name="pagePie">
+            <attribute name="icon">
+             <iconset>
+              <normaloff>image/pie.png</normaloff>image/pie.png</iconset>
+            </attribute>
+            <attribute name="title">
+             <string>Pieplot</string>
+            </attribute>
+           </widget>
+           <widget class="QCustomPlot" name="pageBox">
+            <attribute name="icon">
+             <iconset>
+              <normaloff>image/boxplot.png</normaloff>image/boxplot.png</iconset>
+            </attribute>
+            <attribute name="title">
+             <string>Boxplot</string>
             </attribute>
            </widget>
           </widget>
@@ -218,38 +249,6 @@
         </item>
        </layout>
       </widget>
-      <widget class="QCustomPlot" name="pageScatter"/>
-      <widget class="QWidget" name="pageThreeD">
-       <widget class="QLabel" name="label_2">
-        <property name="geometry">
-         <rect>
-          <x>80</x>
-          <y>60</y>
-          <width>211</width>
-          <height>81</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>轨迹图</string>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="pagePie">
-       <widget class="QLabel" name="label_3">
-        <property name="geometry">
-         <rect>
-          <x>160</x>
-          <y>90</y>
-          <width>121</width>
-          <height>51</height>
-         </rect>
-        </property>
-        <property name="text">
-         <string>饼状图</string>
-        </property>
-       </widget>
-      </widget>
-      <widget class="QCustomPlot" name="pageBox"/>
       <widget class="QCustomPlot" name="pageAd"/>
       <widget class="QWidget" name="pageTable">
        <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -533,8 +532,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>123</width>
-                   <height>170</height>
+                   <width>140</width>
+                   <height>260</height>
                   </rect>
                  </property>
                 </widget>
@@ -563,8 +562,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>123</width>
-                   <height>170</height>
+                   <width>140</width>
+                   <height>260</height>
                   </rect>
                  </property>
                 </widget>
@@ -666,7 +665,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>886</width>
+     <width>999</width>
      <height>28</height>
     </rect>
    </property>
@@ -705,6 +704,7 @@
     </widget>
     <addaction name="menu_3"/>
     <addaction name="action_Column_Type_Splitter"/>
+    <addaction name="action_ad"/>
     <addaction name="action_large"/>
     <addaction name="action_quit"/>
    </widget>
@@ -745,11 +745,6 @@
    </attribute>
    <addaction name="action_table"/>
    <addaction name="action_line"/>
-   <addaction name="action_scatter"/>
-   <addaction name="action_3d"/>
-   <addaction name="action_pie"/>
-   <addaction name="action_box"/>
-   <addaction name="action_ad"/>
    <addaction name="action_representative"/>
   </widget>
   <action name="action_quit">
@@ -853,7 +848,7 @@
   </action>
   <action name="action_representative">
    <property name="text">
-    <string>代表数据选择</string>
+    <string>Representative</string>
    </property>
   </action>
   <action name="action_Column_Type_Splitter">

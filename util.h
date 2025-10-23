@@ -14,6 +14,7 @@
 #include <QJsonObject>
 
 #include "processdata.h"
+#include "debug.h"
 class Util
 {
 public:

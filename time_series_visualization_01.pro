@@ -31,6 +31,7 @@ SOURCES += \
 
 HEADERS += \
     databasehandler.h \
+    debug.h \
     drawplot.h \
     mainwindow.h \
     processdata.h \

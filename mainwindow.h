@@ -16,7 +16,8 @@
 #include <QMap>
 #include <QChartView>
 #include <QElapsedTimer>
-
+#include <QtDataVisualization/QValue3DAxis>
+#include <QLinearGradient>
 // Third-party libraries
 #include "xlsxdocument.h"
 
@@ -25,6 +26,7 @@
 #include "databasehandler.h"
 #include "drawplot.h"
 #include "util.h"
+#include "debug.h"
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -51,10 +53,10 @@ private:
     QVector<QVector<QString>> Data;
 
     // 接口函数
-    void initialPlot();  // 初始化所有图
+    void initialPlot(const QStringList& columnNames);  // 初始化所有图
     void drawTablePlot(const QVector<QVector<QString>>& Data);
-    void drawThreeD();
-    void drawPiePlot();
+    void drawThreeD(const QVector<QString>& timeData);
+    void drawPiePlot(const QStringList& columnNames);
     void drawAnomalyDetection();
     void drawLargeLine();
     void loadDatasetAndUpdateLine(const QString &selectedFile);
@@ -71,6 +73,11 @@ private:
     bool isPlaying = false;
     int playSpeed = 1;
     QTimer *timer = nullptr;
+
+    bool lineDrawn = false;
+    bool adDrawn = false;
+
+    QString timeColumnName; // 横坐标:“飞行时间”或者“FXSJ”或者“flightTime”或者第一列的列名
 
     // 数据类型分类
     QSet<QString> textColumn;

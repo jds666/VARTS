@@ -40,7 +40,7 @@ QVector<double> ProcessData::preprocessQStringtoDouble(const QVector<QString> &Q
             doubleData.append(value);
         } else {
             // 如果转换失败，可以根据需要处理错误，例如跳过该值或记录错误信息
-            qDebug() << "Conversion failed for:" << str;
+             DEBUG_LOG( "Conversion failed for:" << str);
             // 这里可以选择抛出异常、跳过或者以其他方式处理无效输入
         }
     }
@@ -56,13 +56,13 @@ void ProcessData::processData(const QVector<QString>& xdata, const QVector<QStri
 
     int startIndex = -1;
     for (int i = 0; i < xdata.size(); ++i) {
-        if (xdata[i] == "0") {
+        if (xdata[i] == "0"||(i>1&&(xdata[i].toDouble() < xdata[i-1].toDouble()))) {
             startIndex = i;
             break;
         }
     }
 
-//    qDebug()<<"startIndex:"<<startIndex;
+     DEBUG_LOG("startIndex:"<<startIndex);
     if (startIndex != -1) {
         for (int i = startIndex+1; i < xdata.size(); ++i) {
             filteredXData.append(xdata[i]);
@@ -104,12 +104,12 @@ void ProcessData::processThreeData(const QVector<QString>& time, const QVector<Q
 
     int startIndex = -1;
     for (int i = 0; i < time.size(); ++i) {
-        if (time[i] == "0") {
+        if (time[i] == "0"||(i>1&&(time[i].toDouble() < time[i-1].toDouble()))) {
             startIndex = i;
             break;
         }
     }
-//    qDebug()<<"startIndex:"<<startIndex;
+//     DEBUG_LOG("startIndex:"<<startIndex);
 
     if (startIndex != -1 && Longitudedata.size()!=0) {
         for (int i = startIndex + 1; i < time.size(); ++i) {
@@ -155,7 +155,7 @@ void ProcessData::processThreeData(const QVector<QString>& time, const QVector<Q
         y.append(sumLatitude / (filteredLongitude.size() - temp));
         z.append(sumAltitude / (filteredLongitude.size() - temp));
     }
-    qDebug()<<"3维数据处理之后的长度:"<<x.size();
+     DEBUG_LOG("3维数据处理之后的长度:"<<x.size());
 }
 
 //间隔采样，如果间隔宽度是10000的倍数，采样结果会是周期的折线。
@@ -274,54 +274,129 @@ std::pair<QVector<double>, QVector<double>> ProcessData::maxMinSample(const QVec
 
     return sampledData;
 }
-// M4 聚合
-std::pair<QVector<double>, QVector<double>> ProcessData::m4Sample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
+//// M4 聚合
+//std::pair<QVector<double>, QVector<double>> ProcessData::m4Sample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval)
+//{
+//    std::pair<QVector<double>, QVector<double>> sampledData;
+//    int originalSize = timeSeconds.size();
+
+//    // 确保至少有一个间隔
+//    if (interval <= 0) {
+//        interval = 1;
+//    }
+
+//    // 计算每个样本区间应包含的数据点数
+//    int samplesPerInterval = originalSize / interval;
+//    if (originalSize % interval != 0) ++samplesPerInterval; // 处理余数情况
+
+//    for (int i = 0; i < originalSize; i += samplesPerInterval) {
+//        double minValue = std::numeric_limits<double>::max();
+//        double maxValue = std::numeric_limits<double>::lowest();
+//        double firstValue = value[i]; // 最早时间戳对应的值
+//        double lastValue = value[qMin(i + samplesPerInterval - 1, originalSize - 1)]; // 最晚时间戳对应的值
+//        int minIndex = -1, maxIndex = -1;
+
+//        // 找到当前区间的最大值和最小值
+//        for (int j = i; j < qMin(i + samplesPerInterval, originalSize); ++j) {
+//            if (value[j] <= minValue) {
+//                minValue = value[j];
+//                minIndex = j;
+//            }
+//            if (value[j] >= maxValue) {
+//                maxValue = value[j];
+//                maxIndex = j;
+//            }
+//        }
+
+//        // 使用一个临时集合来存储唯一的时间-值对
+//        QSet<std::pair<double, double>> uniquePoints;
+
+//        // 添加最小值
+//        uniquePoints.insert({timeSeconds[minIndex], minValue});
+//        // 添加最大值
+//        uniquePoints.insert({timeSeconds[maxIndex], maxValue});
+//        // 添加最早时间戳对应的值
+//        uniquePoints.insert({timeSeconds[i], firstValue});
+//        // 添加最晚时间戳对应的值
+//        uniquePoints.insert({timeSeconds[qMin(i + samplesPerInterval - 1, originalSize - 1)], lastValue});
+
+//        // 将唯一的时间-值对添加到结果集中
+//        for (const auto& point : uniquePoints) {
+//            sampledData.first.append(point.first);
+//            sampledData.second.append(point.second);
+//        }
+//    }
+
+//    return sampledData;
+//}
+// 修正M4采样实现
+std::pair<QVector<double>, QVector<double>> ProcessData::m4Sample(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints)
 {
     std::pair<QVector<double>, QVector<double>> sampledData;
     int originalSize = timeSeconds.size();
 
-    // 确保至少有一个间隔
-    if (interval <= 0) {
-        interval = 1;
+    if (originalSize <= targetPoints || targetPoints <= 0) {
+        // 数据量小于目标点数，直接返回原数据
+        sampledData.first = timeSeconds;
+        sampledData.second = value;
+        return sampledData;
     }
 
-    // 计算每个样本区间应包含的数据点数
-    int samplesPerInterval = originalSize / interval;
-    if (originalSize % interval != 0) ++samplesPerInterval; // 处理余数情况
+    // 计算每个区间应该包含的数据点数
+    int pointsPerSegment = originalSize / targetPoints;
 
-    for (int i = 0; i < originalSize; i += samplesPerInterval) {
-        double minValue = std::numeric_limits<double>::max();
-        double maxValue = std::numeric_limits<double>::lowest();
-        double firstValue = value[i]; // 最早时间戳对应的值
-        double lastValue = value[qMin(i + samplesPerInterval - 1, originalSize - 1)]; // 最晚时间戳对应的值
-        int minIndex = -1, maxIndex = -1;
+    for (int i = 0; i < targetPoints; ++i) {
+        int startIdx = i * pointsPerSegment;
+        int endIdx = (i == targetPoints - 1) ? originalSize - 1 : (i + 1) * pointsPerSegment - 1;
 
-        // 找到当前区间的最大值和最小值
-        for (int j = i; j < qMin(i + samplesPerInterval, originalSize); ++j) {
-            if (value[j] <= minValue) {
-                minValue = value[j];
-                minIndex = j;
+        if (startIdx >= originalSize) break;
+
+        // 在当前区间内找到最小值、最大值、第一个值和最后一个值
+        double minVal = value[startIdx];
+        double maxVal = value[startIdx];
+        double firstVal = value[startIdx];
+        double lastVal = value[endIdx];
+        int minIdx = startIdx, maxIdx = startIdx;
+
+        for (int j = startIdx + 1; j <= endIdx; ++j) {
+            if (value[j] < minVal) {
+                minVal = value[j];
+                minIdx = j;
             }
-            if (value[j] >= maxValue) {
-                maxValue = value[j];
-                maxIndex = j;
+            if (value[j] > maxVal) {
+                maxVal = value[j];
+                maxIdx = j;
             }
         }
 
-        // 使用一个临时集合来存储唯一的时间-值对
-        QSet<std::pair<double, double>> uniquePoints;
+        // 按时间顺序添加特征点，确保连续性
+        QVector<std::pair<double, double>> segmentPoints;
 
-        // 添加最小值
-        uniquePoints.insert({timeSeconds[minIndex], minValue});
-        // 添加最大值
-        uniquePoints.insert({timeSeconds[maxIndex], maxValue});
-        // 添加最早时间戳对应的值
-        uniquePoints.insert({timeSeconds[i], firstValue});
-        // 添加最晚时间戳对应的值
-        uniquePoints.insert({timeSeconds[qMin(i + samplesPerInterval - 1, originalSize - 1)], lastValue});
+        // 添加第一个点
+        segmentPoints.append({timeSeconds[startIdx], firstVal});
 
-        // 将唯一的时间-值对添加到结果集中
-        for (const auto& point : uniquePoints) {
+        // 如果最小值不是第一个点，添加最小值
+        if (minIdx != startIdx && minIdx != endIdx) {
+            segmentPoints.append({timeSeconds[minIdx], minVal});
+        }
+
+        // 如果最大值不是第一个点且不是最小值点，添加最大值
+        if (maxIdx != startIdx && maxIdx != endIdx && maxIdx != minIdx) {
+            segmentPoints.append({timeSeconds[maxIdx], maxVal});
+        }
+
+        // 添加最后一个点（如果不是重复点）
+        if (endIdx != startIdx) {
+            segmentPoints.append({timeSeconds[endIdx], lastVal});
+        }
+
+        // 按时间排序并添加到结果
+        std::sort(segmentPoints.begin(), segmentPoints.end(),
+                 [](const std::pair<double, double>& a, const std::pair<double, double>& b) {
+                     return a.first < b.first;
+                 });
+
+        for (const auto& point : segmentPoints) {
             sampledData.first.append(point.first);
             sampledData.second.append(point.second);
         }

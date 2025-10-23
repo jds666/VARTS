@@ -257,21 +257,21 @@ QVector<QVector<QString>> Util::M4GreedySelectColumns(
 
         QVector<double> time(series.size());
         std::iota(time.begin(), time.end(), 0);
-        auto sampled = ProcessData::m4Sample(time, series, 10);
+        auto sampled = ProcessData::m4Sample(time, series, rawData[0].size()/1000);
         sampledData[i] = std::move(sampled.second); // 只保存降采样值
     }
 
     // ===== Step 3. 计算 DTW 矩阵 =====
     int window = 10;
-    qDebug() << "计算全局 DTW 矩阵。。。";
+     DEBUG_LOG("计算全局 DTW 矩阵。。。") ;
     QVector<QVector<double>> dtwMatrix = ProcessData::computeDtwMatrix(sampledData, window);
 
     // ===== Step 4. 计算平均距离矩阵 =====
-    qDebug() << "计算平均距离矩阵。。。";
+     DEBUG_LOG("计算平均距离矩阵。。。") ;
     QVector<double> avgValues = ProcessData::computeAverageMatrix(dtwMatrix);
 
     // ===== Step 5. 贪心选择索引 =====
-    qDebug() << "调用贪心选择算法。。。参数 k:" << k << " alpha: " << alpha;
+     DEBUG_LOG("调用贪心选择算法。。。参数 k:" << k << " alpha: " << alpha) ;
     QVector<int> selectedRelativeIndices =
         ProcessData::greedySelectIndices(sampledData, dtwMatrix, avgValues, k, alpha);
 
@@ -308,7 +308,7 @@ bool Util::loadLanguageFile(const QString& langCode)
     }
 
     languageConfig = doc.object();
-    qDebug() << "已加载语言文件:" << path;
+     DEBUG_LOG("已加载语言文件:" << path) ;
     return true;
 }
 

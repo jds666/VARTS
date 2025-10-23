@@ -57,9 +57,9 @@ void DrawPlot::drawScatterPlot(QCustomPlot* Plot, const QVector<QString>& xdata,
         double epsilon = 0.1; // 误差小于0.1说明0.1秒之内的数据，直接取平均
 
         // 数据处理
-        qDebug() << xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size();
+         DEBUG_LOG(xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size()) ;
         ProcessData::processData(xdata, ydata, epsilon, x, y);
-        qDebug() << xdata[0] << "长度:" << x.size() << ydata[0] << "长度:" << y.size();
+         DEBUG_LOG(xdata[0] << "处理后长度:" << x.size() << ydata[0] << "处理后长度:" << y.size()) ;
 
         // **创建原始散点图并设置数据**
         customPlot->addGraph();
@@ -100,9 +100,9 @@ void DrawPlot::drawScatterPlotAndSample(QCustomPlot* Plot, const QVector<QString
         double epsilon = 0.1; // 误差小于0.1说明0.1秒之内的数据，直接取平均
 
         // 数据处理
-        qDebug() << xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size();
+         DEBUG_LOG(xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size());
         ProcessData::processData(xdata, ydata, epsilon, x, y);
-        qDebug() << xdata[0] << "长度:" << x.size() << ydata[0] << "长度:" << y.size();
+         DEBUG_LOG(xdata[0] << "长度:" << x.size() << ydata[0] << "长度:" << y.size());
 
         // **创建原始散点图并设置数据**
         customPlot->addGraph();
@@ -244,7 +244,7 @@ void DrawPlot::drawSingleLineChartByDB(QCustomPlot* Plot, const QVector<double> 
     if (customPlot)
     {
 
-        qDebug()<<xColumnName;
+         DEBUG_LOG(xColumnName);
         // 创建折线图并设置数据:
         customPlot->addGraph();
         customPlot->graph(0)->setData(xdata, ydata);
@@ -280,7 +280,7 @@ void DrawPlot::drawScatterPlotByDB(QCustomPlot* Plot, const QVector<double>& xda
     QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(Plot);
     if (customPlot)
     {
-        qDebug()<<xColumnName;
+         DEBUG_LOG(xColumnName);
 
         // 创建散点图并设置数据:
         customPlot->addGraph();
@@ -447,12 +447,66 @@ void DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QS
 
     // 调整坐标轴范围以适应数据
     plot->rescaleAxes();
+//  plot->setFixedWidth(1000 + plot->axisRect()->margins().left() + plot->axisRect()->margins().right());
 
     // 重绘图表
     plot->replot();
 }
 
+void DrawPlot::drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
+{
+    QCustomPlot* plot = qobject_cast<QCustomPlot*>(Plot);
+    if (!plot || myData.isEmpty()) return;
+    plot->clearGraphs();
 
+    const int targetPoints = 1000; // 直接使用1000个目标点
+
+    for (int i = 0; i < myData.size(); ++i) {
+        if (myData[i].isEmpty()) continue;
+
+        QString columnName = myData[i][0];
+        QVector<double> yData;
+
+        for (int j = 1; j < myData[i].size(); ++j) {
+            bool ok;
+            double value = myData[i][j].toDouble(&ok);
+            yData.append(ok ? value : 0);
+        }
+
+        if (yData.isEmpty()) continue;
+
+        QVector<double> xData(yData.size());
+        for (int j = 0; j < xData.size(); ++j) {
+            xData[j] = j;
+        }
+
+        // 如果数据量不大，直接绘制
+        if (yData.size() <= targetPoints * 2) {
+            int graphIndex = plot->graphCount();
+            plot->addGraph();
+            plot->graph(graphIndex)->setData(xData, yData);
+        } else {
+            // 大数据量使用M4采样
+            auto sampledData = ProcessData::m4Sample(xData, yData, targetPoints);
+            int graphIndex = plot->graphCount();
+            plot->addGraph();
+            plot->graph(graphIndex)->setData(sampledData.first, sampledData.second);
+        }
+
+        // 设置样式
+        QColor color = columnColors.contains(columnName) ? columnColors[columnName] : QColor::fromHsv((i * 40) % 360, 200, 255);
+        plot->graph(plot->graphCount()-1)->setPen(QPen(color, 1.5));
+        plot->graph(plot->graphCount()-1)->setName(columnName);
+        plot->graph(plot->graphCount()-1)->setAntialiased(true);
+    }
+
+    plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
+    plot->axisRect()->setupFullAxesBox();
+    plot->rescaleAxes();
+    plot->setFixedWidth(1000 + plot->axisRect()->margins().left() + plot->axisRect()->margins().right());
+    plot->setAntialiasedElements(QCP::aeAll);
+    plot->replot();
+}
 
 // 滑动平均函数：步长等于窗口大小
 void DrawPlot::applySlidingAverageWithStep(const QVector<double>& x, const QVector<double>& y, int windowSize, QVector<double>& smoothedX, QVector<double>& smoothedY)

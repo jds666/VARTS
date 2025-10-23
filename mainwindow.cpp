@@ -9,10 +9,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     // openEuler22.03中自带的openGauss
     if(handler.initialize("192.168.127.131", "openGauss", "jdd", "123456@jdd", 7654))
-    // openEuler20.03源代码编译的openGuass
-//    if(handler.initialize("192.168.127.134", "openGauss5.0.3", "jdd", "123456@jdd", 5432))
+        // openEuler20.03源代码编译的openGuass
+        //    if(handler.initialize("192.168.127.134", "openGauss5.0.3", "jdd", "123456@jdd", 5432))
     {
-        qDebug() << "数据库连接成功";
+        DEBUG_LOG("数据库连接成功");
         // 测试数据
         // handler.showAllTableContents("mytest");
         // 导入数据
@@ -22,59 +22,74 @@ MainWindow::MainWindow(QWidget *parent)
     }
     else
     {
-        qDebug() << "数据库连接失败";
+        DEBUG_LOG("数据库连接失败");
     }
     // 语言加载
     Util::loadLanguageFile("zh_CN"); // 默认中文，可改成 "en_US" 切换英文
 
     //列名分类
     numColumn = {"俯仰角", "滚转角", "航迹角", "俯仰角速度", "滚转角速度", "偏航角速度", "飞行时间", "升降舵反馈", "左副翼舵反馈", "右副翼舵反馈", "方向舵反馈",
-                "电源电压", "飞控版本号", "CPU电压", "升降舵输出", "左副翼舵输出", "右副翼舵输出", "BD1星数", "GPS1星数", "GLONNASS1星数", "BD2/GPS1时",
-                "BD2/GPS1分", "BD2/GPS1秒", "BD2/GPS1经度", "BD2/GPS1纬度", "BD2/GPS1高度", "BD2/GPS1地速", "BD2/GPS1天速", "BD2/GPS1航迹角",
-                "气压高度", "高度变换率", "真空速", "指示空速", "方向舵输出", "油门输出", "俯仰角给定", "滚转角给定", "航向角给定", "高度给定",
-                "滚转角积分", "磁航向角", "待飞距", "侧偏距", "航路", "航点", "GPS2星数", "BD2星数", "BD2/GPS2经度", "BD2/GPS2纬度", "BD2/GPS2高度",
-                "BD2/GPS2地速", "BD2/GPS2天速", "BD2/GPS2航迹角", "BD2/GPS2时", "BD2/GPS2分", "BD2/GPS2秒", "横向延迟", "纵向延迟", "当前绝对高度",
-                "当前天速", "当前地速", "当前相对高度", "航线航向", "机箱温度", "当前经度", "当前纬度", "大气机地高", "GPS地高", "校时", "推算时间",
-                "待切航路", "待切航点", "任务起点", "程控选择", "遥控状态", "油门反馈",
-                "pitchAngle", "rollAngle", "courseAngle", "pitchRate", "rollRate", "yawRate", "flightTime",
-                "elevatorFeedback", "leftAileronFeedback", "rightAileronFeedback", "rudderFeedback", "powerVoltage",
-                "flightControllerVersion", "cpuVoltage", "elevatorOutput", "leftAileronOutput", "rightAileronOutput",
-                "bd1SatelliteCount", "gps1SatelliteCount",
-                "glonass1SatelliteCount", "bd2Gps1Hour", "bd2Gps1Minute", "bd2Gps1Second", "bd2Gps1Longitude",
-                "bd2Gps1Latitude", "bd2Gps1Altitude", "bd2Gps1GroundSpeed", "bd2Gps1AirSpeed", "bd2Gps1CourseAngle",
-                "pressureAltitude", "altitudeRateOfChange", "trueAirspeed", "indicatedAirspeed",
-                "rudderOutput", "throttleOutput", "pitchAngleSetpoint", "rollAngleSetpoint", "headingAngleSetpoint",
-                "altitudeSetpoint", "rollAngleIntegral", "magneticHeadingAngle", "distanceToGo",
-                "driftDistance", "flightPath", "waypoint", "gps2SatelliteCount", "bd2SatelliteCount",
-                "bd2Gps2Longitude","bd2Gps2Latitude", "bd2Gps2Altitude",
-                "bd2Gps2GroundSpeed", "bd2Gps2AirSpeed", "bd2Gps2CourseAngle",
-                "bd2Gps2Hour", "bd2Gps2Minute", "bd2Gps2Second", "lateralDelay", "longitudinalDelay", "currentAbsoluteAltitude",
-                "currentAirSpeed", "currentGroundSpeed", "currentRelativeAltitude", "flightPathHeading",
-                "fuselageTemperature", "currentLongitude", "currentLatitude", "atmosphericAltitude", "gpsAltitude",
-                "timeSynchronization", "estimatedTime", "pendingFlightPath", "pendingWaypoint", "missionStartPoint",
-                "autopilotSelection", "remoteControlStatus", "throttleFeedback"};
+                 "电源电压", "飞控版本号", "CPU电压", "升降舵输出", "左副翼舵输出", "右副翼舵输出", "BD1星数", "GPS1星数", "GLONNASS1星数", "BD2/GPS1时",
+                 "BD2/GPS1分", "BD2/GPS1秒", "BD2/GPS1经度", "BD2/GPS1纬度", "BD2/GPS1高度", "BD2/GPS1地速", "BD2/GPS1天速", "BD2/GPS1航迹角",
+                 "气压高度", "高度变换率", "真空速", "指示空速", "方向舵输出", "油门输出", "俯仰角给定", "滚转角给定", "航向角给定", "高度给定",
+                 "滚转角积分", "磁航向角", "待飞距", "侧偏距", "航路", "航点", "GPS2星数", "BD2星数", "BD2/GPS2经度", "BD2/GPS2纬度", "BD2/GPS2高度",
+                 "BD2/GPS2地速", "BD2/GPS2天速", "BD2/GPS2航迹角", "BD2/GPS2时", "BD2/GPS2分", "BD2/GPS2秒", "横向延迟", "纵向延迟", "当前绝对高度",
+                 "当前天速", "当前地速", "当前相对高度", "航线航向", "机箱温度", "当前经度", "当前纬度", "大气机地高", "GPS地高", "校时", "推算时间",
+                 "待切航路", "待切航点", "任务起点", "程控选择", "遥控状态", "油门反馈",
+                 "pitchAngle", "rollAngle", "courseAngle", "pitchRate", "rollRate", "yawRate", "flightTime",
+                 "elevatorFeedback", "leftAileronFeedback", "rightAileronFeedback", "rudderFeedback", "powerVoltage",
+                 "flightControllerVersion", "cpuVoltage", "elevatorOutput", "leftAileronOutput", "rightAileronOutput",
+                 "bd1SatelliteCount", "gps1SatelliteCount",
+                 "glonass1SatelliteCount", "bd2Gps1Hour", "bd2Gps1Minute", "bd2Gps1Second", "bd2Gps1Longitude",
+                 "bd2Gps1Latitude", "bd2Gps1Altitude", "bd2Gps1GroundSpeed", "bd2Gps1AirSpeed", "bd2Gps1CourseAngle",
+                 "pressureAltitude", "altitudeRateOfChange", "trueAirspeed", "indicatedAirspeed",
+                 "rudderOutput", "throttleOutput", "pitchAngleSetpoint", "rollAngleSetpoint", "headingAngleSetpoint",
+                 "altitudeSetpoint", "rollAngleIntegral", "magneticHeadingAngle", "distanceToGo",
+                 "driftDistance", "flightPath", "waypoint", "gps2SatelliteCount", "bd2SatelliteCount",
+                 "bd2Gps2Longitude","bd2Gps2Latitude", "bd2Gps2Altitude",
+                 "bd2Gps2GroundSpeed", "bd2Gps2AirSpeed", "bd2Gps2CourseAngle",
+                 "bd2Gps2Hour", "bd2Gps2Minute", "bd2Gps2Second", "lateralDelay", "longitudinalDelay", "currentAbsoluteAltitude",
+                 "currentAirSpeed", "currentGroundSpeed", "currentRelativeAltitude", "flightPathHeading",
+                 "fuselageTemperature", "currentLongitude", "currentLatitude", "atmosphericAltitude", "gpsAltitude",
+                 "timeSynchronization", "estimatedTime", "pendingFlightPath", "pendingWaypoint", "missionStartPoint",
+                 "autopilotSelection", "remoteControlStatus", "throttleFeedback",
+                 "副翼舵输出","机动样式","离散输入","离散输出1","离散输出2","离散输出3","无线电高度","超低空给定","超低空高度",
+                 "超低空高度变换率","加速度1","加速度2","加速度3",
+                 "FYJ","GZJ","HJJ","FYJSD","GZJSD","PHJSD","FXSJ","SJDFK","ZFYDFK","YFYDFK","FXDFK","DYDY","FKBBH","CDY","SJDSC",
+                 "ZFYDSC","YFYDSC","BD1XS","GPS1XS","G1XS","GPS1S","GPS1F","GPS1M","GPS1JD","GPS1WD","GPS1GD","GPS1DS","GPS1TS",
+                 "GPS1HJJ","QYGD","GDBHL","ZKS","ZSKS","FXDSC","YMSC","FYJGD","GZJGD","HXJGD","GDGD","GZJJF","CHXJ","DFJ","CPJ",
+                 "HL","HD","WXDGD","CDKGD1","CDKGD2","CDKGDL","GPS2XS","BD2XS","GPS2JD","GPS2WD","GPS2GD","GPS2DS","GPS2TS",
+                 "GPS2HJJ","GPS2S","GPS2F","GPS2M","HXYC","ZXYC","DQJDGD","DQTS","DQDS","DQXDGD","HXHX","JXWD","DQJD","DQWD",
+                 "DQJDG","GDG","XS","TSSJ","DQHL","DQHD","RWQD","CKXZ","YMFK","YKZT"};
     textColumn = {"BD2/GPS1定位模式","bd2Gps1PositioningMode","BD2/GPS1定位状态","bd2Gps1PositioningStatus",
                   "大气机状态","atmosphericCondition", "磁罗盘状态","magneticCompassStatus","飞控模态","flightControlMode",
                   "安控状态","safetyControlStatus","GPS识别","gpsIdentification","安控信号","safetyControlSignal",
-                  "BD2/GPS2定位状态","bd2Gps2PositioningStatus","油门档位","throttlePosition"};
+                  "BD2/GPS2定位状态","bd2Gps2PositioningStatus","油门档位","throttlePosition",
+                  "接收指令回报","状态字1","状态字2","状态字3","执行指令回报","靶机工作模式",
+                  "GPS1DWMS","GPS1DWZT","DQJZT","CLPZT","FKMT","JDYS","AKZT","GPSSB","AKXH","GPS2DWZT","YMDW","BJGZMS"};
 
     //UI布局
     ui->setupUi(this);
-//    setupPlot();
+    //    setupPlot();
     //设置标题
 
-    setWindowTitle("FlyTsViz");
+    setWindowTitle("FTsViz");
 
     setWindowIcon(QIcon(":/visual"));
     ui->speedlabel->setAlignment(Qt::AlignCenter);  // 设置居中对齐
     ui->horizontalSlider->setRange(1, 100);  // 设置范围
     ui->horizontalSlider->setValue(1);
-//    ui->stackedWidget->setFixedSize(2100,800);
-//    // 设置ui->scrollArea_line布局
-//    QWidget* lineChartContainer = new QWidget(ui->scrollArea_line); // 创建一个容器窗口小部件
-//    lineChartLayout= new QVBoxLayout(lineChartContainer); // 在容器中创建垂直布局
-//    ui->scrollArea_line->setWidget(lineChartContainer); // 将容器设置为滚动区域的窗口小部件
-//    lineChartContainer->setLayout(lineChartLayout);
+    //    ui->stackedWidget->setFixedSize(2100,800);
+    //    // 设置ui->scrollArea_line布局
+    //    QWidget* lineChartContainer = new QWidget(ui->scrollArea_line); // 创建一个容器窗口小部件
+    //    lineChartLayout= new QVBoxLayout(lineChartContainer); // 在容器中创建垂直布局
+    //    ui->scrollArea_line->setWidget(lineChartContainer); // 将容器设置为滚动区域的窗口小部件
+    //    lineChartContainer->setLayout(lineChartLayout);
+
+    //    // 设置全局样式，好丑
+    //    QFile file(":/QtTheme/Integrid/Integrid.qss");
+    //    file.open(QFile::ReadOnly);
+    //    setStyleSheet(file.readAll());
 
     //设置toolbar样式
     QIcon lineIcon(":/line");  // 创建QIcon 对象表示toolbar中折线图的图标
@@ -84,78 +99,78 @@ MainWindow::MainWindow(QWidget *parent)
     QIcon boxplotIcon(":/boxplot");
     QIcon adIcon(":/AD");
     QIcon tableIcon(":/table");
+    QIcon representativeIcon(":/representative");
+    QIcon mlineIcon(":/mline");
+
+    ui->tab->tabBar()->setTabIcon(0, lineIcon);
+    ui->tab->tabBar()->setTabIcon(1,mlineIcon);
+    ui->tab->tabBar()->setTabIcon(2, scatterIcon);
+    ui->tab->tabBar()->setTabIcon(3, threeDscatterIcon);
+    ui->tab->tabBar()->setTabIcon(4, pieIcon);
+    ui->tab->tabBar()->setTabIcon(5, boxplotIcon);
+
+
     ui->action_line->setIcon(lineIcon);  // 设置 QAction 的图标
-    ui->action_line->setIconText("Lineplot");  // 设置文本
-    ui->action_line->setText("折线图");  // 设置工具提示文本
-    ui->action_scatter->setIcon(scatterIcon);
-    ui->action_scatter->setIconText("Scatter");  // 设置文本
-    ui->action_scatter->setText("散点图");  // 设置工具提示文本
-    ui->action_pie->setIcon(pieIcon);
-    ui->action_pie->setIconText("Pieplot");  // 设置文本
-    ui->action_pie->setText("饼状图");  // 设置工具提示文本
-    ui->action_3d->setIcon(threeDscatterIcon);
-    ui->action_3d->setIconText("Trajectory");  // 设置文本
-    ui->action_3d->setText("轨迹图");  // 设置工具提示文本
-    ui->action_box->setIcon(boxplotIcon);
-    ui->action_box->setIconText("Boxplot");  // 设置文本
-    ui->action_box->setText("箱线图");  // 设置工具提示文本
+    ui->action_line->setIconText("Basic Viz");  // 设置文本
+    ui->action_line->setText("基础可视化");  // 设置工具提示文本
+
     ui->action_ad->setIcon(adIcon);
     ui->action_ad->setIconText("Anomaly Detection");  // 设置文本
     ui->action_ad->setText("异常检测");  // 设置工具提示文本
     ui->action_table->setIcon(tableIcon);
     ui->action_table->setIconText("Table");
     ui->action_table->setText("概况表");
+    ui->action_representative->setIcon(representativeIcon);
+    ui->action_representative->setIconText("Representative");
+    ui->action_representative->setText("代表数据选择");
 
-
+    // 初始状态在表格页
+    ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageTable));
     //滑杆绑定
     connect(ui->horizontalSlider, &QSlider::valueChanged, this, &MainWindow::handleSpeedValueChanged);
     connect(ui->horizontalSlider_k, &QSlider::sliderReleased, this, &MainWindow::handleSelectKValueChanged);
     connect(ui->horizontalSlider_alpha, &QSlider::sliderReleased, this, &MainWindow::handleSelectAlphaValueChanged);
 
-    //更换图栈
-    ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->single_line));
-    connect(ui->action_scatter,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageScatter));
+
+    // 只在第一次点击使调用的功能
+    connect(ui->action_large,&QAction::triggered,this,[=]() {
+        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageLarge));
+        if (!lineDrawn) {
+            drawLargeLine();
+            lineDrawn = true;
+        }
     });
-    connect(ui->action_line,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageLine));
-    });
-    connect(ui->action_3d,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageThreeD));
-    });
-    connect(ui->action_pie,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pagePie));
-    });
-    connect(ui->action_box,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageBox));
-    });
-    connect(ui->action_ad,&QAction::triggered,this,[=]() {
+    connect(ui->action_ad, &QAction::triggered, this, [=]() {
         ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageAd));
+        if (!adDrawn) {
+            drawAnomalyDetection();
+            adDrawn = true;
+        }
     });
+    // 绑定按钮和图栈
     connect(ui->action_table,&QAction::triggered,this,[=]() {
         ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageTable));
     });
-    connect(ui->action_large,&QAction::triggered,this,[=]() {
-        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageLarge));
+    connect(ui->action_line, &QAction::triggered, this, [=]() {
+        ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageLine));
     });
     connect(ui->action_representative,&QAction::triggered,this,[=]() {
         ui->stackedWidget->setCurrentIndex(ui->stackedWidget->indexOf(ui->pageRepresentative));
     });
     //直接绘制异常图片
-//    tracerXText = new QCPItemText(ui->pageAd);
-//    tracerXText->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);//文字布局：顶、左对齐
-//    tracerXText->position->setType(QCPItemPosition::ptAxisRectRatio);//位置类型（当前轴范围的比例为单位/实际坐标为单位）
-//    tracerXText->position->setCoords(0.5, 0); //把文字框放在X轴的中间，Y轴的最顶部
-//    tracerXText->setFont(QFont(font().family(), 16)); //字体大小
-//    tracerXText->setPen(QPen(Qt::black)); //字体颜色
-//    tracerXText->setPadding(QMargins(2,2,2,2));//文字距离边框几个像素
+    //    tracerXText = new QCPItemText(ui->pageAd);
+    //    tracerXText->setPositionAlignment(Qt::AlignTop|Qt::AlignLeft);//文字布局：顶、左对齐
+    //    tracerXText->position->setType(QCPItemPosition::ptAxisRectRatio);//位置类型（当前轴范围的比例为单位/实际坐标为单位）
+    //    tracerXText->position->setCoords(0.5, 0); //把文字框放在X轴的中间，Y轴的最顶部
+    //    tracerXText->setFont(QFont(font().family(), 16)); //字体大小
+    //    tracerXText->setPen(QPen(Qt::black)); //字体颜色
+    //    tracerXText->setPadding(QMargins(2,2,2,2));//文字距离边框几个像素
 
     tracer = new QCPItemTracer(ui->pageAd);
     tracer->setInterpolating(false);//游标禁用插值
     tracer->setGraph(ui->pageAd->graph(0));// 设置游标吸附在ui->pageAd->graph(0)这条曲线上
-    drawAnomalyDetection();
-    drawLargeLine();
-    initDatasetComboBox();
+
+    initDatasetComboBox();// 代表性选择功能的初始点
 
 
 
@@ -199,7 +214,7 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(ui->actionhttps_doc_qt_io, &QAction::triggered, this,[]() { // Lambda 表达式
         QUrl url("https://doc.qt.io/");
         if (!QDesktopServices::openUrl(url)) {
-            qDebug() << "Could not open URL";
+            DEBUG_LOG("Could not open URL");
         }
     });
 
@@ -236,14 +251,14 @@ void MainWindow::updateLineChart()
             {
                 QVector<QString> xdata,ydata;
                 // "飞行时间" 列
-                xdata = getColumnDataByColumnName("飞行时间");
+                xdata = getColumnDataByColumnName(timeColumnName);
                 // 当前选择列
                 ydata = getColumnDataByColumnName(checkedCheckBox->text());
                 QCustomPlot* customPlot = findChild<QCustomPlot*>(QString("customPlot_") + checkedCheckBox->text());
-    //            qDebug()<<"更新"<<customPlot->objectName();
+                //             DEBUG_LOG(msg)"更新"<<customPlot->objectName();
                 if (customPlot)
                 {
-    //                qDebug()<<"绘图更新"<<customPlot->objectName();
+                    //                 DEBUG_LOG(msg)"绘图更新"<<customPlot->objectName();
                     // 准备绘图数据
                     ui->statusbar->showMessage("Drawing Dynamic Line Chart  " + QString::number(timeStart/5) + " seconds");
 
@@ -330,13 +345,13 @@ void MainWindow::updateLineChart()
             }
             else
             {
-                qDebug()<<"updateLineChart no inputstatus == 3 or anyothers";
+                DEBUG_LOG("updateLineChart no inputstatus == 3 or anyothers");
             }
         }
         if(inputstatus==1||inputstatus==2)
         {
             QVector<QString> xdata,ydata;
-            xdata = getColumnDataByColumnName("飞行时间");
+            xdata = getColumnDataByColumnName(timeColumnName);
             ydata = getColumnDataByColumnName(ui->comboBox->currentText());
             QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(ui->single_line);
             if (customPlot)
@@ -418,7 +433,7 @@ void MainWindow::updateLineChart()
         }
         else
         {
-            qDebug()<<"updateLineChart no inputstatus == 3 or anyothers";
+            DEBUG_LOG("updateLineChart no inputstatus == 3 or anyothers");
         }
 
     }
@@ -438,7 +453,7 @@ void MainWindow::handleSelectKValueChanged()
         QTimer::singleShot(200, this, [this]() {
             selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
             updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
-            DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+            DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
         });
     }
 }
@@ -452,7 +467,7 @@ void MainWindow::handleSelectAlphaValueChanged()
         QTimer::singleShot(200, this, [this]() {
             selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
             updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
-            DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+            DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
         });
     }
 }
@@ -466,13 +481,13 @@ void MainWindow::handleCheckBoxStateChanged(int state)
         QString checkBoxText = checkBox->text();
         if (state == Qt::Checked)
         {
-            qDebug() << checkBoxText << "复选框 被选中";
+            DEBUG_LOG(checkBoxText << "复选框 被选中");
             checkedCheckBoxList.append(checkBox);
             drawMultiLineChart(checkedCheckBoxList);
         }
         else if (state == Qt::Unchecked)
         {
-            qDebug() << checkBoxText << "复选框 取消选中";
+            DEBUG_LOG(checkBoxText << "复选框 取消选中");
             checkedCheckBoxList.removeOne(checkBox);
             drawMultiLineChart(checkedCheckBoxList);
         }
@@ -492,7 +507,7 @@ void clearWidgetLayout(QWidget* widget) {
 
 bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 {
-//    qDebug() <<obj->objectName();
+    //     DEBUG_LOG(msg)obj->objectName();
     if(obj->objectName().contains("AnomalyDetectionPlot"))
     {
         QMouseEvent* mouseEvent = static_cast<QMouseEvent*>(event);
@@ -512,31 +527,13 @@ bool MainWindow::eventFilter(QObject* obj, QEvent* event)
 
 
 
-//        qDebug() << QString::number(traceX)<<","<<QString::number(traceY);
+        //         DEBUG_LOG(msg) QString::number(traceX)<<","<<QString::number(traceY);
         ui->statusbar->showMessage("x:"+QString::number(traceX)+","+"y:"+QString::number(traceY));
 
-//        tracerXText->setText(QString::number(traceX)+","+QString::number(traceY));//
+        //        tracerXText->setText(QString::number(traceX)+","+QString::number(traceY));//
 
 
         ui->pageAd->replot();
-
-//        double traceX = tracer->position->key();
-//        double traceY = tracer->position->value();
-//        qDebug() << "3";
-
-//        QCPItemText* tracerXText = new QCPItemText(ui->pageAd);//在QCustomplot中新建文字框
-//        QCPItemText* tracerYText = new QCPItemText(ui->pageAd);//在QCustomplot中新建文字框
-//        tracerXText->setText(QString::number(traceX));//游标文本框，指示游标的X值
-//        tracerYText->setText(QString::number(traceY));//游标文本框，指示游标的Y值
-
-//        //计算游标X值对应的所有曲线的Y值
-//        for(int i = 0; i < graphCount(); i++)
-//        {
-//            //搜索左边离traceX最近的key对应的点，详情参考findBegin函数的帮助
-//            QCPDataContainer<QCPGraphData>::const_iterator coorPoint = graph(i)->data().data()->findBegin(traceX, , true);//true代表向左搜索
-//            qDebug() << QString("graph%1对应的Y值是").arg(i) << coorPoint->value;
-
-//        }
     }
 
     if (event->type() == QEvent::MouseButtonPress)
@@ -667,28 +664,28 @@ void MainWindow::handleActionExcelTriggered()
 
     // 获取当前时间
     QDateTime currentTime1 = QDateTime::currentDateTime();
-    // 使用 qDebug() 输出当前时间
-    qDebug() << "文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss");
+    //  输出当前时间
+    DEBUG_LOG("文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss")) ;
 
     // 检查是否选择了文件
     if (!filePath.isEmpty())
     {
 
         QDateTime currentTime2 = QDateTime::currentDateTime();
-        qDebug() << "文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG("文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss")) ;
 
         // 打开 Excel 文件
         QXlsx::Document xlsx(filePath);
 
         QDateTime currentTime3 = QDateTime::currentDateTime();
-        qDebug() << "打开 Excel 文件" <<endl<<"当前时间："<< currentTime3.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG("打开 Excel 文件" <<endl<<"当前时间："<< currentTime3.toString("yyyy-MM-dd hh:mm:ss")) ;
 
         // 获取行数和列数
         int rowCount = xlsx.dimension().rowCount();
         int columnCount = xlsx.dimension().columnCount();
         // 获取当前时间
         QDateTime currentTime4 = QDateTime::currentDateTime();
-        qDebug() << "获取行数和列数 " <<endl<<"当前时间："<< currentTime4.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG("获取行数和列数 " <<endl<<"当前时间："<< currentTime4.toString("yyyy-MM-dd hh:mm:ss")) ;
 
         // 创建进度条
         QProgressBar* progressBar = new QProgressBar();
@@ -696,7 +693,7 @@ void MainWindow::handleActionExcelTriggered()
         progressBar->setRange(0, columnCount);  // 设置进度条范围
 
         // 获取列名
-        QVector<QString> columnNames;
+        QStringList columnNames;
         for (int column = 1; column <= columnCount; ++column)
         {
             QVariant columnName = xlsx.cellAt(1, column)->value();
@@ -707,10 +704,10 @@ void MainWindow::handleActionExcelTriggered()
         ui->comboBox->clear();
 
         // 输出列名
-        qDebug() << "Excel 列名:";
+        DEBUG_LOG("Excel 列名:");
         for (const QString& columnName : columnNames)
         {
-            qDebug() << columnName;
+            DEBUG_LOG(columnName) ;
             //设置选择框中的选项
             if (numColumn.contains(columnName) && columnName!="飞行时间")
             {
@@ -720,7 +717,7 @@ void MainWindow::handleActionExcelTriggered()
 
         // 读取数据并存储到 columnData 中
         Data.clear();
-        qDebug() << "正在存储数据到 columnData 中";
+        DEBUG_LOG("正在存储数据到 columnData 中");
         for (int col = 1; col <= columnCount; ++col)
         {
             QVector<QString> column;
@@ -740,19 +737,19 @@ void MainWindow::handleActionExcelTriggered()
         inputstatus = 1;
         // 获取当前时间
         QDateTime currentTime5 = QDateTime::currentDateTime();
-        qDebug() << "已经读取excel内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG("已经读取excel内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss")) ;
 
         // 从状态栏中移除进度条
         statusBar()->removeWidget(progressBar);
 
         delete progressBar;
-        initialPlot();
+        initialPlot(columnNames);
     }
 }
 void MainWindow::handleActionDatabaseTriggered()
 {
-//    // 实例化DatabaseHandler
-//    DatabaseHandler dbHandler;
+    //    // 实例化DatabaseHandler
+    //    DatabaseHandler dbHandler;
 
     // 初始化数据库连接
     if (handler.initialize("192.168.127.131", "openGauss", "jdd", "123456@jdd", 7654))
@@ -767,16 +764,16 @@ void MainWindow::handleActionDatabaseTriggered()
 
             inputstatus = 4;
             // 数据处理完毕，可以考虑初始化图表或其他后续操作
-            initialPlot(); // 假设这是初始化图表的函数，需要确保Data已被正确填充
+            initialPlot(columnNames); // 假设这是初始化图表的函数，需要确保Data已被正确填充
         }
         else
         {
-            qDebug() << "未能获取到列名";
+            DEBUG_LOG("未能获取到列名") ;
         }
     }
     else
     {
-        qDebug() << "数据库连接失败";
+        DEBUG_LOG("数据库连接失败") ;
     }
 }
 void MainWindow::handleActionCsvTriggered()
@@ -785,19 +782,19 @@ void MainWindow::handleActionCsvTriggered()
     QString filePath = QFileDialog::getOpenFileName(this, "选择文件", "", "CSV 文件 (*.csv)");
 
     // 获取当前时间
-//    QDateTime currentTime1 = QDateTime::currentDateTime();
-//    qDebug() << "文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss");
+    //    QDateTime currentTime1 = QDateTime::currentDateTime();
+    //     DEBUG_LOG(msg) "文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss");
 
     // 检查是否选择了文件
     if (!filePath.isEmpty())
     {
-//        QDateTime currentTime2 = QDateTime::currentDateTime();
-//        qDebug() << "文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss");
+        //        QDateTime currentTime2 = QDateTime::currentDateTime();
+        //         DEBUG_LOG(msg) "文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss");
 
         QFile csvFile(filePath);
         if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "无法打开 CSV 文件：" << csvFile.errorString();
+            DEBUG_LOG("无法打开 CSV 文件：" << csvFile.errorString()) ;
             return;
         }
 
@@ -812,9 +809,14 @@ void MainWindow::handleActionCsvTriggered()
         }
         else
         {
-            qDebug() << "CSV 文件为空或无法读取列名";
+            DEBUG_LOG("CSV 文件为空或无法读取列名") ;
             csvFile.close();
             return;
+        }
+        DEBUG_LOG(filePath);
+        DEBUG_LOG("列名：") ;
+        for( QString columnName : columnNames){
+            DEBUG_LOG(columnName) ;
         }
 
         //更新复选框与高维界面布局
@@ -839,34 +841,32 @@ void MainWindow::handleActionCsvTriggered()
         {
             row.resize(numRows);
         }
-//        qDebug() <<"maxColumns "<<maxColumns;
-//        qDebug() <<"Data.size() "<<Data.size();
-//        qDebug() <<"Data[0].size() "<<Data[0].size();
+         DEBUG_LOG("maxColumns "<<maxColumns);
+         DEBUG_LOG("Data.size() "<<Data.size());
+         DEBUG_LOG("Data[0].size() "<<Data[0].size());
         // 重置文件读取位置
         csvFile.seek(0);
         in.seek(0); // 对于 QTextStream，使用 in.seek(0) 来重新定位内部读取位置
 
         currentRow = 0;
-        while (in.readLineInto(&line)&&currentRow<numRows)//
+        while (in.readLineInto(&line) && currentRow < numRows)
         {
             QStringList values = line.split(',', QString::SkipEmptyParts);
-//            qDebug()<<"values: "<<values;
             for (int i = 0; i < values.size() && i < maxColumns; ++i)
             {
                 Data[i][currentRow] = values[i];
             }
             currentRow++;
-//            qDebug()<<currentRow;
         }
-//        qDebug() <<"关闭文件"<<endl<<"currentRow: "<<currentRow;
+
+        DEBUG_LOG("关闭文件" <<"currentRow: "<<currentRow);
         csvFile.close();
         inputstatus = 2;
         // 获取当前时间
-//        QDateTime currentTime5 = QDateTime::currentDateTime();
-//        qDebug() << "已经读取CSV内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss");
+        //        QDateTime currentTime5 = QDateTime::currentDateTime();
+        //         DEBUG_LOG(msg) "已经读取CSV内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss");
 
-        initialPlot();
-        // 预处理数据 rawdata->preprocesseddata
+        initialPlot(columnNames); // 初始化绘图
 
     }
 }
@@ -883,12 +883,12 @@ void MainWindow::setupCheckboxesForColumns(const QStringList& columnNames)
     // 清空comboBox
     ui ->comboBox->clear();
     // 输出列名
-    qDebug() << "列名:";
+    DEBUG_LOG( "列名:");
     for (const QString& columnName : columnNames)
     {
-        if (numColumn.contains(columnName) && columnName!="飞行时间")
+        if (numColumn.contains(columnName) && columnName!= timeColumnName)
         {
-            qDebug() << columnName;
+            DEBUG_LOG(columnName) ;
             ui->comboBox->addItem(columnName);
         }
     }
@@ -896,11 +896,11 @@ void MainWindow::setupCheckboxesForColumns(const QStringList& columnNames)
     //清除原来的复选框与折线图布局
     clearWidgetLayout(ui->scrollArea_checkbox);
     clearWidgetLayout(ui->scrollArea_line);
-    qDebug() << "清除原来布局";
+    DEBUG_LOG("清除原来布局") ;
     checkBoxList.clear();//清除复选框
     checkedCheckBoxList.clear();
     draggableFrames.clear();
-    qDebug() << "清除复选框";
+    DEBUG_LOG("清除复选框") ;
     // 添加复选框
     QWidget* checkBoxContainer = new QWidget(ui->scrollArea_checkbox); // 创建一个容器窗口小部件
     QVBoxLayout* layout = new QVBoxLayout(checkBoxContainer); // 在容器中创建垂直布局
@@ -908,7 +908,7 @@ void MainWindow::setupCheckboxesForColumns(const QStringList& columnNames)
 
     for (const QString& columnName : columnNames)
     {
-        if (numColumn.contains(columnName) && columnName!="飞行时间")
+        if (numColumn.contains(columnName) && columnName!=timeColumnName)
         {
             QCheckBox* checkBox = new QCheckBox(columnName, checkBoxContainer); // 将容器作为复选框的父控件
             checkBox->setFont(QFont("", 15)); // 设置字体大小为15
@@ -918,7 +918,7 @@ void MainWindow::setupCheckboxesForColumns(const QStringList& columnNames)
             connect(checkBox, &QCheckBox::stateChanged, this, &MainWindow::handleCheckBoxStateChanged);
         }
     }
-//    checkBoxContainer->setLayout(layout); // 将垂直布局设置给容器
+    //    checkBoxContainer->setLayout(layout); // 将垂直布局设置给容器
 
     // 添加折线图框，设置ui->scrollArea_line布局
     QWidget* lineChartContainer = new QWidget(ui->scrollArea_line); // 创建一个容器窗口小部件
@@ -936,18 +936,18 @@ void MainWindow::handleActionTxtTriggered()
 
     // 获取当前时间
     QDateTime currentTime1 = QDateTime::currentDateTime();
-    qDebug() << "文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss");
+    DEBUG_LOG("文件"<<filePath<<"已选择  "<<endl<<"当前时间："<< currentTime1.toString("yyyy-MM-dd hh:mm:ss")) ;
 
     // 检查是否选择了文件
     if (!filePath.isEmpty())
     {
         QDateTime currentTime2 = QDateTime::currentDateTime();
-        qDebug() << "文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG( "文件不为空" <<endl<<"当前时间："<< currentTime2.toString("yyyy-MM-dd hh:mm:ss"));
 
         QFile csvFile(filePath);
         if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "无法打开 CSV 文件：" << csvFile.errorString();
+            DEBUG_LOG("无法打开 CSV 文件：" << csvFile.errorString()) ;
             return;
         }
 
@@ -963,7 +963,7 @@ void MainWindow::handleActionTxtTriggered()
         }
         else
         {
-            qDebug() << "CSV 文件为空或无法读取列名";
+            DEBUG_LOG("CSV 文件为空或无法读取列名") ;
             csvFile.close();
             return;
         }
@@ -972,10 +972,10 @@ void MainWindow::handleActionTxtTriggered()
         ui->comboBox->clear();
 
         // 输出列名并设置选择框中的选项
-        qDebug() << "CSV 列名:";
+        DEBUG_LOG("CSV 列名:") ;
         for (const QString& columnName : columnNames)
         {
-            qDebug() << columnName;
+            DEBUG_LOG(columnName) ;
             if (numColumn.contains(columnName) && columnName!="飞行时间")
             {
                 ui->comboBox->addItem(columnName);
@@ -1001,9 +1001,9 @@ void MainWindow::handleActionTxtTriggered()
         {
             row.resize(numRows);
         }
-        qDebug() <<"maxColumns "<<maxColumns;
-        qDebug() <<"Data.size() "<<Data.size();
-        qDebug() <<"Data[0].size() "<<Data[0].size();
+        DEBUG_LOG("maxColumns "<<maxColumns);
+        DEBUG_LOG("Data.size() "<<Data.size());
+        DEBUG_LOG("Data[0].size() "<<Data[0].size());
         // 重置文件读取位置
         csvFile.seek(0);
         in.seek(0); // 对于 QTextStream，使用 in.seek(0) 来重新定位内部读取位置
@@ -1012,21 +1012,21 @@ void MainWindow::handleActionTxtTriggered()
         while (in.readLineInto(&line)&&currentRow<numRows)//
         {
             QStringList values = line.split(',', QString::SkipEmptyParts);
-//            qDebug()<<"values: "<<values;
+            //             DEBUG_LOG(msg)"values: "<<values;
             for (int i = 0; i < values.size() && i < maxColumns; ++i)
             {
                 Data[i][currentRow] = values[i];
             }
             currentRow++;
-//            qDebug()<<currentRow;
+            //             DEBUG_LOG(msg)currentRow;
         }
-        qDebug() <<"关闭文件"<<endl<<"currentRow: "<<currentRow;
+        DEBUG_LOG("关闭文件"<<endl<<"currentRow: "<<currentRow);
         csvFile.close();
 
         inputstatus = 3;
         // 获取当前时间
         QDateTime currentTime5 = QDateTime::currentDateTime();
-        qDebug() << "已经读取CSV内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss");
+        DEBUG_LOG("已经读取CSV内容到Data中"<<endl<<"当前时间："<< currentTime5.toString("yyyy-MM-dd hh:mm:ss")) ;
 
 
         QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(ui->single_line);
@@ -1108,13 +1108,13 @@ void MainWindow::onComboBoxIndexChanged()
 {
     QComboBox* comboBox = ui->comboBox;
     QString selectedItem = comboBox->currentText();
-    qDebug()<<"selectedItem:"<<selectedItem;
+    DEBUG_LOG("selectedItem:"<<selectedItem);
     if(inputstatus == 1 || inputstatus == 2)
     {
         QVector<QString> xdata,ydata;
 
         // "飞行时间" 列
-        xdata = getColumnDataByColumnName("飞行时间");
+        xdata = getColumnDataByColumnName(timeColumnName);
         // 指定列
         ydata = getColumnDataByColumnName(selectedItem);
 
@@ -1139,7 +1139,7 @@ void MainWindow::onComboBoxIndexChanged()
     }
     else
     {
-        qDebug()<<"onComboBoxIndexChanged no inputstatus == 3";
+        DEBUG_LOG("onComboBoxIndexChanged no inputstatus == 3");
     }
 }
 
@@ -1151,10 +1151,10 @@ void MainWindow::onComboBoxDatasetChanged()
         loadDatasetAndUpdateLine(selectedFile);
         ui->statusbar->showMessage("更新完成,数据集:"+selectedFile);
     } catch (const std::exception& e) {
-        qDebug() << "Error in onComboBoxDatasetChanged:" << e.what();
+        DEBUG_LOG("Error in onComboBoxDatasetChanged:" << e.what()) ;
         QMessageBox::critical(this, "Error", QString("Failed to process dataset: %1").arg(e.what()));
     } catch (...) {
-        qDebug() << "Unknown error in onComboBoxDatasetChanged";
+        DEBUG_LOG( "Unknown error in onComboBoxDatasetChanged");
         QMessageBox::critical(this, "Error", "An unknown error occurred while processing dataset");
     }
 }
@@ -1184,7 +1184,7 @@ void MainWindow::onRestartButtonClicked()
         {
             QVector<QString> xdata,ydata;
             // "飞行时间" 列
-            xdata = getColumnDataByColumnName("飞行时间");
+            xdata = getColumnDataByColumnName(timeColumnName);
             // 当前选择列
             ydata = getColumnDataByColumnName(checkedCheckBox->text());
             QCustomPlot* customPlot = findChild<QCustomPlot*>(QString("customPlot_") + checkedCheckBox->text());
@@ -1255,7 +1255,7 @@ void MainWindow::onRestartButtonClicked()
     }
     else
     {
-        qDebug()<<"onRestartButtonClicked no inputstatus == 3";
+        DEBUG_LOG("onRestartButtonClicked no inputstatus == 3");
     }
 }
 
@@ -1266,7 +1266,7 @@ QCustomPlot *MainWindow::createLineChart(const QString& yText)
     if(inputstatus == 1 || inputstatus ==2)
     {
         QVector<QString> xdata, ydata;
-        xdata = getColumnDataByColumnName("飞行时间");
+        xdata = getColumnDataByColumnName(timeColumnName);
         // 指定列
         ydata = getColumnDataByColumnName(yText);
         if (customPlot)
@@ -1408,16 +1408,65 @@ void MainWindow::drawTablePlot(const QVector<QVector<QString>>& Data)
 
 }
 
-
-void MainWindow::drawThreeD()
+void MainWindow::drawThreeD(const QVector<QString>& timeData)
 {
-    // 创建一个 Q3DScatter 实例
+    // === 关键：清理 pageThreeD 的旧内容 ===
+    QLayout* oldLayout = ui->pageThreeD->layout();
+    if (oldLayout) {
+        // 删除布局中的所有子控件
+        QLayoutItem* item;
+        while ((item = oldLayout->takeAt(0))) {
+            if (item->widget()) {
+                delete item->widget();  // 删除 widget（如 createWindowContainer 创建的容器）
+            }
+            delete item;  // 删除 layout item
+        }
+        delete oldLayout;
+    }
+
+    // 现在 ui->pageThreeD 没有布局了，可以重新创建
+
+    // 获取列名列表
+    QComboBox *comboBox = ui->comboBox;
+    QStringList columnNames;
+    for (int i = 0; i < comboBox->count(); ++i) {
+        columnNames << comboBox->itemText(i);
+    }
+
+    // 设置坐标轴对应字段名
+    QString Latitude, Altitude, Longitude;
+    if (columnNames.contains("俯仰角")) {
+        Latitude  = "BD2/GPS2纬度";
+        Altitude  = "BD2/GPS2高度";
+        Longitude = "BD2/GPS2经度";
+    }
+    else if (columnNames.contains("pitchAngle")) {
+        Latitude  = "bd2Gps2Latitude";
+        Altitude  = "bd2Gps2Altitude";
+        Longitude = "bd2Gps2Longitude";
+    }
+    else if (columnNames.contains("FYJ")) {
+        Latitude  = "GPS2WD";
+        Altitude  = "GPS2GD";
+        Longitude = "GPS2JD";
+    }else {
+        return; // 没有匹配字段，不绘制
+    }
+
+    // 获取数据
+    QVector<QString> Longitudedata = getColumnDataByColumnName(Latitude);
+    QVector<QString> Latitudedata = getColumnDataByColumnName(Altitude);
+    QVector<QString> Altitudedata = getColumnDataByColumnName(Longitude);
+
+    QVector<double> t;
+    QVector<float> x, y, z;
+    double epsilon = 20;
+
+    ProcessData::processThreeData(timeData, Longitudedata, Latitudedata, Altitudedata, epsilon, t, x, y, z);
+
+    // 创建 3D 散点图
     QtDataVisualization::Q3DScatter *graph = new QtDataVisualization::Q3DScatter();
-
-    // 设置图表的标题
     graph->setTitle("3D Scatter Chart Example");
-
-    // 设置 x、y、z 轴的标签
     graph->axisX()->setTitle("Latitude");
     graph->axisY()->setTitle("Altitude");
     graph->axisZ()->setTitle("Longitude");
@@ -1425,187 +1474,350 @@ void MainWindow::drawThreeD()
     graph->axisY()->setTitleVisible(true);
     graph->axisZ()->setTitleVisible(true);
 
-    // 获取左侧选择框文本列表
-    QComboBox *comboBox = ui->comboBox;
-    QStringList columnNames;
-    for (int i = 0; i < comboBox->count(); ++i) {
-        columnNames << comboBox->itemText(i);
-    }
-
-    // 创建四个QString,如果有中文列名就设置为中文,否则设置为英文
-    QString Latitude,Altitude,Longitude;
-    if(columnNames.contains("俯仰角"))
-    {
-        Latitude = "BD2/GPS2纬度";
-        Altitude = "BD2/GPS2高度";
-        Longitude = "BD2/GPS2经度";
-    }
-    else if(columnNames.contains("pitchAngle")){
-        Latitude = "bd2Gps2Latitude";
-        Altitude = "bd2Gps2Altitude";
-        Longitude = "bd2Gps2Longitude";
-    }
-
-    // 创建散点图数据
-    // 准备绘图数据:
-    QVector<QString> time = getColumnDataByColumnName("飞行时间");
-    QVector<QString> Longitudedata = getColumnDataByColumnName(Latitude);
-    QVector<QString> Latitudedata = getColumnDataByColumnName(Altitude);
-    QVector<QString> Altitudedata = getColumnDataByColumnName( Longitude);
-    QVector<double> t;
-    QVector<float> x, y, z;
-    double epsilon = 20;
-
-    //数据处理
-    ProcessData::processThreeData(time,Longitudedata ,Latitudedata, Altitudedata,epsilon,t,x,y,z);
-
+    // 准备数据
     QtDataVisualization::QScatterDataArray data;
-
-    qDebug()<<"x.size():"<<x.size();
-    if(x.size()!=0)
-    {
-        for (int i = 0; i < x.size(); i++) {
-            QVector3D point(x[i], y[i], z[i]);
-//            qDebug()<<point;
-            data << point;
+    if (!x.isEmpty()) {
+        for (int i = 0; i < x.size(); ++i) {
+            data << QVector3D(x[i], y[i], z[i]);
         }
     }
-//    for (int i = 0; i < 10; i++) {
-//        QVector3D point(i, i, i);
-//        qDebug()<<point;
-//        data << point;
-//    }
-    // 创建数据代理，并将数据添加到代理中
+
+//     设置数据代理和系列
     QtDataVisualization::QScatterDataProxy *proxy = new QtDataVisualization::QScatterDataProxy();
     proxy->addItems(data);
 
-    // 创建系列，并将数据代理添加到系列中
     QtDataVisualization::QScatter3DSeries *series = new QtDataVisualization::QScatter3DSeries(proxy);
     series->setItemSize(0.1f);
-
-    // 将系列添加到图表中
     graph->addSeries(series);
 
-    // 调整轴的范围以适应数据
-    qDebug()<<"x max:"<<*std::min_element(x.constBegin(), x.constEnd())<<"x min:"<<*std::max_element(x.constBegin(), x.constEnd());
-    graph->axisX()->setRange(*std::min_element(x.constBegin(), x.constEnd()), *std::max_element(x.constBegin(), x.constEnd()));
-    graph->axisY()->setRange(*std::min_element(y.constBegin(), y.constEnd()), *std::max_element(y.constBegin(), y.constEnd()));
-    graph->axisZ()->setRange(*std::min_element(z.constBegin(), z.constEnd()), *std::max_element(z.constBegin(), z.constEnd()));
+//    // === 准备数据并设置颜色渐变 ===
+//    QtDataVisualization::QScatterDataArray data;
+//    QVector<QColor> colorList;  // 每个点的颜色
 
+//    if (!x.isEmpty()) {
+//        QColor startColor(0, 0, 255);   // 蓝色 (起点)
+//        QColor endColor(255, 0, 0);     // 红色 (终点)
 
-    // 将图表添加到 ui->pageThreeD 中
-    QHBoxLayout *layout = new QHBoxLayout(ui->pageThreeD);
-    layout->addWidget(QWidget::createWindowContainer(graph));
+//        for (int i = 0; i < x.size(); ++i) {
+//            double ratio = double(i) / double(x.size() - 1); // 用 double，避免精度提升警告
+//            QColor color = QColor::fromRgbF(
+//                startColor.redF()   + ratio * (endColor.redF()   - startColor.redF()),
+//                startColor.greenF() + ratio * (endColor.greenF() - startColor.greenF()),
+//                startColor.blueF()  + ratio * (endColor.blueF()  - startColor.blueF())
+//            );
+
+//            // 明确使用 QScatterDataItem 包装位置
+//            data << QtDataVisualization::QScatterDataItem(QVector3D(x[i], y[i], z[i]));
+//            colorList.append(color);
+//        }
+//    }
+
+//    // === 固定颜色数量实现整体渐变 ===
+//    int totalPoints = data.size();
+//    if (totalPoints == 0) return;
+//    const int colorSteps = qMin(20, totalPoints); // 防止 series 数量爆炸
+
+//    QColor startColor(0, 0, 255);
+//    QColor endColor(255, 0, 0);
+
+//    // 生成颜色列表
+//    QVector<QColor> fixedColors;
+//    for (int i = 0; i < colorSteps; ++i) {
+//        double ratio = double(i) / double(colorSteps - 1);
+//        QColor color = QColor::fromRgbF(
+//            startColor.redF()   + ratio * (endColor.redF()   - startColor.redF()),
+//            startColor.greenF() + ratio * (endColor.greenF() - startColor.greenF()),
+//            startColor.blueF()  + ratio * (endColor.blueF()  - startColor.blueF())
+//        );
+//        fixedColors.append(color);
+//    }
+
+//    // 每段的点数（至少 1）
+//    int pointsPerColor = qMax(1, totalPoints / colorSteps);
+
+//    // === 生成多个小 series，每个颜色一段 ===
+//    for (int c = 0; c < colorSteps; ++c) {
+//        int startIdx = c * pointsPerColor;
+//        int endIdx = (c == colorSteps - 1) ? totalPoints : (c + 1) * pointsPerColor;
+//        if (startIdx >= totalPoints) break;
+
+//        QtDataVisualization::QScatterDataArray segmentData;
+//        for (int i = startIdx; i < endIdx && i < totalPoints; ++i) {
+//            // 获取原始点（位置）
+//            QtDataVisualization::QScatterDataItem item(data[i].position());
+//            item.setColor(fixedColors[c]);  // ⭐⭐⭐ 必须手动设置颜色
+//            segmentData << item;
+//        }
+
+//        // 创建代理并添加数据
+//        QtDataVisualization::QScatterDataProxy *segmentProxy = new QtDataVisualization::QScatterDataProxy();
+//        segmentProxy->addItems(segmentData);
+
+//        // 创建系列
+//        QtDataVisualization::QScatter3DSeries *segmentSeries = new QtDataVisualization::QScatter3DSeries(segmentProxy);
+//        segmentSeries->setItemSize(0.08f);
+//        // setBaseColor 已被覆盖，可省略
+//        graph->addSeries(segmentSeries);
+//    }
+
+    // 调整坐标轴范围
+    if (!x.isEmpty()) {
+        graph->axisX()->setRange(*std::min_element(x.constBegin(), x.constEnd()),
+                                 *std::max_element(x.constBegin(), x.constEnd()));
+        graph->axisY()->setRange(*std::min_element(y.constBegin(), y.constEnd()),
+                                 *std::max_element(y.constBegin(), y.constEnd()));
+        graph->axisZ()->setRange(*std::min_element(z.constBegin(), z.constEnd()),
+                                 *std::max_element(z.constBegin(), z.constEnd()));
+    }
+
+    // 创建窗口容器并添加到布局
+    QWidget *container = QWidget::createWindowContainer(graph);
+    container->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    QHBoxLayout *layout = new QHBoxLayout();
+    layout->addWidget(container);
+    ui->pageThreeD->setLayout(layout);
 }
+
+//void MainWindow::drawThreeD()
+//{
+//    // 创建一个 Q3DScatter 实例
+//    QtDataVisualization::Q3DScatter *graph = new QtDataVisualization::Q3DScatter();
+
+//    // 设置图表的标题
+//    graph->setTitle("3D Scatter Chart Example");
+
+//    // 设置 x、y、z 轴的标签
+//    graph->axisX()->setTitle("Latitude");
+//    graph->axisY()->setTitle("Altitude");
+//    graph->axisZ()->setTitle("Longitude");
+//    graph->axisX()->setTitleVisible(true);
+//    graph->axisY()->setTitleVisible(true);
+//    graph->axisZ()->setTitleVisible(true);
+
+//    // 获取左侧选择框文本列表
+//    QComboBox *comboBox = ui->comboBox;
+//    QStringList columnNames;
+//    for (int i = 0; i < comboBox->count(); ++i) {
+//        columnNames << comboBox->itemText(i);
+//    }
+
+//    // 创建四个QString,如果有中文列名就设置为中文,否则设置为英文
+//    QString Latitude,Altitude,Longitude;
+//    if(columnNames.contains("俯仰角"))
+//    {
+//        Latitude = "BD2/GPS2纬度";
+//        Altitude = "BD2/GPS2高度";
+//        Longitude = "BD2/GPS2经度";
+//    }
+//    else if(columnNames.contains("pitchAngle")){
+//        Latitude = "bd2Gps2Latitude";
+//        Altitude = "bd2Gps2Altitude";
+//        Longitude = "bd2Gps2Longitude";
+//    }
+
+//    // 创建散点图数据
+//    // 准备绘图数据:
+//    QVector<QString> time = getColumnDataByColumnName("飞行时间");
+//    QVector<QString> Longitudedata = getColumnDataByColumnName(Latitude);
+//    QVector<QString> Latitudedata = getColumnDataByColumnName(Altitude);
+//    QVector<QString> Altitudedata = getColumnDataByColumnName( Longitude);
+//    QVector<double> t;
+//    QVector<float> x, y, z;
+//    double epsilon = 20;
+
+//    //数据处理
+//    ProcessData::processThreeData(time,Longitudedata ,Latitudedata, Altitudedata,epsilon,t,x,y,z);
+
+//    QtDataVisualization::QScatterDataArray data;
+
+//    DEBUG_LOG("x.size():"<<x.size());
+//    if(x.size()!=0)
+//    {
+//        for (int i = 0; i < x.size(); i++) {
+//            QVector3D point(x[i], y[i], z[i]);
+//            //             DEBUG_LOG(point);
+//            data << point;
+//        }
+//    }
+//    //    for (int i = 0; i < 10; i++) {
+//    //        QVector3D point(i, i, i);
+//    //         DEBUG_LOG(point);
+//    //        data << point;
+//    //    }
+//    // 创建数据代理，并将数据添加到代理中
+//    QtDataVisualization::QScatterDataProxy *proxy = new QtDataVisualization::QScatterDataProxy();
+//    proxy->addItems(data);
+
+//    // 创建系列，并将数据代理添加到系列中
+//    QtDataVisualization::QScatter3DSeries *series = new QtDataVisualization::QScatter3DSeries(proxy);
+//    series->setItemSize(0.1f);
+
+//    // 将系列添加到图表中
+//    graph->addSeries(series);
+
+//    // 调整轴的范围以适应数据
+//    DEBUG_LOG("x max:"<<*std::min_element(x.constBegin(), x.constEnd())<<"x min:"<<*std::max_element(x.constBegin(), x.constEnd()));
+//    graph->axisX()->setRange(*std::min_element(x.constBegin(), x.constEnd()), *std::max_element(x.constBegin(), x.constEnd()));
+//    graph->axisY()->setRange(*std::min_element(y.constBegin(), y.constEnd()), *std::max_element(y.constBegin(), y.constEnd()));
+//    graph->axisZ()->setRange(*std::min_element(z.constBegin(), z.constEnd()), *std::max_element(z.constBegin(), z.constEnd()));
+
+
+//    // 将图表添加到 ui->pageThreeD 中
+//    QHBoxLayout *layout = new QHBoxLayout(ui->pageThreeD);
+//    layout->addWidget(QWidget::createWindowContainer(graph));
+//}
 
 /**
  * @brief MainWindow::initialPlot
  * 初始化所有图
  */
-void MainWindow::initialPlot()
+void MainWindow::initialPlot(const QStringList& columnNames)
 {
-//    qDebug()<<"Data.size() "<<Data.size();
-//    qDebug()<<"Data[0].size() "<<Data[0].size();
-//    for(int i=0;i<Data.size();i++)
-//    {
-//        for (int j=Data[0].size()-10;j<Data[0].size();j++) {
-//            qDebug() << Data[i][j]<< " ";
-//        } qDebug()<<endl;
-//    }
-
-    // 图片默认展示第一列数据的图
-    if((inputstatus == 1) or (inputstatus == 2))
+    if ((inputstatus == 1) || (inputstatus == 2))
     {
-        QVector<QString> xdata,ydata;
-        // "飞行时间" 列
-        xdata = getColumnDataByColumnName("飞行时间");
+        QVector<QString> xdata, ydata;
 
-        // 第一列
-        ydata = getColumnDataByColumnIndex(0);
+        // --- 自动匹配“飞行时间”列名 ---
+        QStringList timeColumnCandidates = {
+            "飞行时间", "FXSJ", "FlightTime", "flightTime",
+            "time", "Time", "timestamp", "Timestamp"
+        };
 
-        // 调用绘制图函数，将数据传递给它
+        for (const QString &candidate : timeColumnCandidates)
+        {
+
+            if (columnNames.contains(candidate))
+            {
+                timeColumnName = candidate;
+                break;
+            }
+        }
+
+        if (timeColumnName.isEmpty())
+        {
+            qWarning() << "未找到‘飞行时间’相关列，使用第 0 列作为横轴。";
+            if (!Data.isEmpty() && !Data[0].isEmpty())
+            {
+                xdata = Data[0];  // fallback
+            }
+        }
+        else
+        {
+            xdata = getColumnDataByColumnName(timeColumnName);
+            DEBUG_LOG(" 使用列名：" << timeColumnName << " 作为“飞行时间”横轴。") ;
+        }
+
+        // --- 默认展示第 1 列或第 0 列数据 ---
+        if (Data.size() > 1)
+            ydata = getColumnDataByColumnIndex(1);
+        else if (Data.size() > 0)
+            ydata = getColumnDataByColumnIndex(0);
+
+        DEBUG_LOG("开始绘图。。。") ;
+        // --- 调用绘图函数 ---
         drawTablePlot(Data);
-        DrawPlot::drawScatterPlot(ui->pageScatter,xdata,ydata);
-        DrawPlot::drawSingleLineChart(ui->single_line,xdata,ydata);
-        drawPiePlot();
-        DrawPlot::drawBoxPlot(ui->pageBox,xdata,ydata,ui->comboBox->currentText());
-        drawThreeD();
+        DEBUG_LOG( "drawTablePlot(Data) 完成");
+        DrawPlot::drawScatterPlot(ui->pageScatter, xdata, ydata);
+        DEBUG_LOG("DrawPlot::drawScatterPlot(ui->pageScatter, xdata, ydata) 完成") ;
+        DrawPlot::drawSingleLineChart(ui->single_line, xdata, ydata);
+        DEBUG_LOG("drawSingleLineChart(ui->single_line, xdata, ydata) 完成") ;
+        drawPiePlot(columnNames);
+        DEBUG_LOG( "drawPiePlot() 完成");
+        DrawPlot::drawBoxPlot(ui->pageBox, xdata, ydata, ui->comboBox->currentText());
+        DEBUG_LOG("DrawPlot::drawBoxPlot(ui->pageBox, xdata, ydata, ui->comboBox->currentText()) 完成");
+        drawThreeD(xdata);
+        DEBUG_LOG("drawThreeD() 完成") ;
     }
-    else if(inputstatus == 4)
+    else if (inputstatus == 4)
     {
-        // 图片默认展示第一列数据的图
         QString columnNamex = "飞行时间";
         QString columnNamey = "俯仰角";
 
         QVector<double> xdata = handler.getDataByColumn(columnNamex);
         QVector<double> ydata = handler.getDataByColumn(columnNamey);
 
-        // 调用绘制图函数，将数据传递给它
-
         drawTablePlotByDB();
-        DrawPlot::drawScatterPlotByDB(ui->pageScatter,xdata,ydata,columnNamex,columnNamey);
-        DrawPlot::drawSingleLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
+        DrawPlot::drawScatterPlotByDB(ui->pageScatter, xdata, ydata, columnNamex, columnNamey);
+        DrawPlot::drawSingleLineChartByDB(ui->single_line, xdata, ydata, columnNamex, columnNamey);
         drawPiePlotByDB();
-        DrawPlot::drawBoxPlotByDB(ui->pageBox,ydata,ui->comboBox->currentText());
+        DrawPlot::drawBoxPlotByDB(ui->pageBox, ydata, ui->comboBox->currentText());
         drawThreeDByDB();
     }
     else
     {
-        qDebug()<<"initialPlot haven't inputstatus == 3";
+        DEBUG_LOG( "initialPlot: inputstatus != 1/2/4");
     }
 }
+
 
 /**
  * @brief MainWindow::drawPiePlot 绘制饼状图
  * @param xdata
  * @param ydata
  */
-void MainWindow::drawPiePlot()
+void MainWindow::drawPiePlot(const QStringList& columnNames)
 {
-    // 获取左侧选择框文本列表
-    QComboBox *comboBox = ui->comboBox;
-    QStringList columnNames;
-    for (int i = 0; i < comboBox->count(); ++i) {
-        columnNames << comboBox->itemText(i);
+    // === 关键：清理 pagePie 的旧内容 ===
+    QLayout* oldLayout = ui->pagePie->layout();
+    if (oldLayout) {
+        // 删除布局中的所有子控件
+        QLayoutItem* item;
+        while ((item = oldLayout->takeAt(0))) {
+            if (item->widget()) {
+                delete item->widget();  // 删除 widget（如 QChartView）
+            }
+            delete item;  // 删除 layout item
+        }
+        delete oldLayout;
     }
 
+    // 现在 pagePie 没有布局了，可以重新创建
+
     // 创建四个QString,如果有中文列名就设置为中文,否则设置为英文
-    QString chartViewName1,chartViewName2,chartViewName3,chartViewName4;
-    if(columnNames.contains("俯仰角"))
-    {
+    QString chartViewName1, chartViewName2, chartViewName3, chartViewName4;
+    if (columnNames.contains("安控状态")) {
         chartViewName1 = "安控信号";
         chartViewName2 = "磁罗盘状态";
         chartViewName3 = "油门档位";
         chartViewName4 = "大气机状态";
     }
-    else if(columnNames.contains("pitchAngle")){
+    else if (columnNames.contains("safetyControlStatus")) {
         chartViewName1 = "safetyControlSignal";
         chartViewName2 = "magneticCompassStatus";
         chartViewName3 = "throttlePosition";
         chartViewName4 = "atmosphericCondition";
+    }else if (columnNames.contains("AKZT")) {
+        chartViewName1 = "AKXH";
+        chartViewName2 = "CLPZT";
+        chartViewName3 = "YMDW";
+        chartViewName4 = "DQJZT";
+    } else {
+        // 可选：处理不匹配的情况
+        return; // 或设置默认值
     }
 
-    // 创建四个饼状图系列
+    // 创建四个饼状图系列（略，保持不变）
     QPieSeries *series1 = new QPieSeries();
-    QMap<QString, int> aggregateddata1 = classifyDataByColumnName( chartViewName1);
+    QMap<QString, int> aggregateddata1 = classifyDataByColumnName(chartViewName1);
     for (auto it = aggregateddata1.begin(); it != aggregateddata1.end(); ++it) {
         series1->append(it.key(), it.value());
     }
 
     QPieSeries *series2 = new QPieSeries();
-    QMap<QString, int> aggregateddata2 = classifyDataByColumnName( chartViewName2);
+    QMap<QString, int> aggregateddata2 = classifyDataByColumnName(chartViewName2);
     for (auto it = aggregateddata2.begin(); it != aggregateddata2.end(); ++it) {
         series2->append(it.key(), it.value());
     }
 
     QPieSeries *series3 = new QPieSeries();
-    QMap<QString, int> aggregateddata3 = classifyDataByColumnName( chartViewName3);
+    QMap<QString, int> aggregateddata3 = classifyDataByColumnName(chartViewName3);
     for (auto it = aggregateddata3.begin(); it != aggregateddata3.end(); ++it) {
         series3->append(it.key(), it.value());
     }
 
     QPieSeries *series4 = new QPieSeries();
-    QMap<QString, int> aggregateddata4 = classifyDataByColumnName( chartViewName4);
+    QMap<QString, int> aggregateddata4 = classifyDataByColumnName(chartViewName4);
     for (auto it = aggregateddata4.begin(); it != aggregateddata4.end(); ++it) {
         series4->append(it.key(), it.value());
     }
@@ -1616,20 +1828,19 @@ void MainWindow::drawPiePlot()
     QChartView *chartView3 = createChartView(series3, chartViewName3);
     QChartView *chartView4 = createChartView(series4, chartViewName4);
 
-    // 设置饼状图视图的大小策略为自适应大小
     chartView1->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     chartView2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     chartView3->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     chartView4->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-    // 创建布局，并将饼状图视图添加到布局中
-    QGridLayout *layout = new QGridLayout(ui->pagePie);
+    // 创建新布局
+    QGridLayout *layout = new QGridLayout();
     layout->addWidget(chartView1, 0, 0);
     layout->addWidget(chartView2, 0, 1);
     layout->addWidget(chartView3, 1, 0);
     layout->addWidget(chartView4, 1, 1);
 
-    // 设置布局到页面
+    // 设置新布局
     ui->pagePie->setLayout(layout);
 }
 
@@ -1642,13 +1853,11 @@ void MainWindow::drawAnomalyDetection()
     // 检查是否选择了文件
     if (!filePath.isEmpty())
     {
-
-
         QFile csvFile(filePath);
-        qDebug()<< filePath<< "文件不为空" <<endl;
+        DEBUG_LOG(filePath<< "文件不为空" <<endl) ;
         if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "无法打开 CSV 文件：" << csvFile.errorString();
+            DEBUG_LOG("无法打开 CSV 文件：" << csvFile.errorString()) ;
             return;
         }
 
@@ -1663,26 +1872,26 @@ void MainWindow::drawAnomalyDetection()
         }
         else
         {
-            qDebug() << "CSV 文件为空或无法读取列名";
+            DEBUG_LOG("CSV 文件为空或无法读取列名") ;
             csvFile.close();
             return;
         }
 
         // 输出列名并设置选择框中的选项
-        qDebug() << "CSV 列名:";
+        DEBUG_LOG("CSV 列名:") ;
         for (const QString& columnName : columnNames)
         {
-            qDebug() << columnName;
+            DEBUG_LOG(columnName) ;
         }
 
         int scoreIndex = columnNames.indexOf("scores");
         int labelIndex = columnNames.indexOf("labels");
         int predIndex = columnNames.indexOf("preds");
         int thresholdIndex = columnNames.indexOf("threshold");
-        qDebug()<<scoreIndex;//11
-        qDebug()<<labelIndex;//12
-        qDebug()<<predIndex;//13
-        qDebug()<<thresholdIndex;//14
+        DEBUG_LOG(scoreIndex);//11
+        DEBUG_LOG(labelIndex);//12
+        DEBUG_LOG(predIndex);//13
+        DEBUG_LOG(thresholdIndex);//14
 
         //保存列名为scores的列的数据到QVector<double> scores,保存列名为labels的列的数据到QVector<double> labels
         QVector<double> scores,x;
@@ -1695,7 +1904,7 @@ void MainWindow::drawAnomalyDetection()
         {
             QString line = in.readLine();
             QStringList fields = line.split(',', QString::SkipEmptyParts);
-//            qDebug()<<lineNum<<":"<<fields;
+            //             DEBUG_LOG(lineNum<<":"<<fields);
 
             // 确保当前行有足够多的列
             if (fields.size() >= columnNames.size()) {
@@ -1714,12 +1923,12 @@ void MainWindow::drawAnomalyDetection()
                         labels.append(labelValue); // 将labels也存储起来，虽然本例未直接用于绘图
                         preds.append(predValue);
                         threshold.append(thresholdValue);
-//                        qDebug()<<lineNum<<":"<<scoreValue<<","<<labelValue<<","<<thresholdValue;
+                        //                        DEBUG_LOG(lineNum<<":"<<scoreValue<<","<<labelValue<<","<<thresholdValue);
                     } else {
-                        qDebug() << "Error converting score value to double.";
+                        DEBUG_LOG("Error converting score value to double.") ;
                     }
                 } else {
-                    qDebug() << "Column 'scores' or 'labels' not found.";
+                    DEBUG_LOG("Column 'scores' or 'labels' not found.") ;
                 }
             }
         }
@@ -1773,7 +1982,7 @@ void MainWindow::drawAnomalyDetection()
                 if(i==0)//从0开始
                 {
                     anomalyStartXs.push_back(i+1);
-                    qDebug()<<"anomalyStartXs:"<<i;
+                    DEBUG_LOG("anomalyStartXs:"<<i);
 
                 }
                 if(i!=0&&i!=preds.size()-1)
@@ -1781,18 +1990,18 @@ void MainWindow::drawAnomalyDetection()
                     if((preds[i-1]^preds[i])==1 ) //开始
                     {
                         anomalyStartXs.push_back(i+1);
-                        qDebug()<<"anomalyStartXs:"<<i;
+                        DEBUG_LOG("anomalyStartXs:"<<i);
                     }
                     if((preds[i]^preds[i+1])==1) //结束
                     {
                         anomalyEndXs.push_back(i+1);
-//                        qDebug()<<"anomalyEndXs:"<<i;
+                        //                         DEBUG_LOG("anomalyEndXs:"<<i);
                     }
                 }
                 if(i==preds.size()-1)//最后一个结束
                 {
-                     anomalyEndXs.push_back(i+1);
-//                     qDebug()<<"anomalyEndXs:"<<i;
+                    anomalyEndXs.push_back(i+1);
+                    //                      DEBUG_LOG("anomalyEndXs:"<<i);
                 }
             }
         }
@@ -1878,10 +2087,10 @@ void MainWindow::drawLargeLine()
     if (!filePath.isEmpty())
     {
         QFile csvFile(filePath);
-        qDebug() << filePath << "文件不为空" << endl;
+        DEBUG_LOG(filePath << "文件不为空" << endl) ;
         if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
         {
-            qDebug() << "无法打开 CSV 文件：" << csvFile.errorString();
+            DEBUG_LOG("无法打开 CSV 文件：" << csvFile.errorString()) ;
             return;
         }
 
@@ -1923,31 +2132,31 @@ void MainWindow::drawLargeLine()
         //减少绘图数据到800个点
 
         // 间隔均匀采样
-//        qDebug() << "间隔均匀采样";
-//        auto sampledData = ProcessData::intervalSample(timeSeconds, value, 1800);
-//        timeSeconds = sampledData.first;
-//        value = sampledData.second;
+        //         DEBUG_LOG("间隔均匀采样") ;
+        //        auto sampledData = ProcessData::intervalSample(timeSeconds, value, 1800);
+        //        timeSeconds = sampledData.first;
+        //        value = sampledData.second;
         // 间隔平均采样
-//        qDebug() << "间隔平均采样";
-//        auto sampledData = ProcessData::intervalAverageSample(timeSeconds, value, 1800);
-//        timeSeconds = sampledData.first;
-//        value = sampledData.second;
+        //         DEBUG_LOG("间隔平均采样") ;
+        //        auto sampledData = ProcessData::intervalAverageSample(timeSeconds, value, 1800);
+        //        timeSeconds = sampledData.first;
+        //        value = sampledData.second;
         // 最大最小采样
-//        qDebug() << "最大最小采样";
-//        auto sampledData = ProcessData::maxMinSample(timeSeconds, value, 1800);
-//        timeSeconds = sampledData.first;
-//        value = sampledData.second;
+        //         DEBUG_LOG("最大最小采样") ;
+        //        auto sampledData = ProcessData::maxMinSample(timeSeconds, value, 1800);
+        //        timeSeconds = sampledData.first;
+        //        value = sampledData.second;
         // M4 聚合 m4Sample
-//        qDebug() << " M4 聚合 ";
-//        auto sampledData = ProcessData::m4Sample(timeSeconds, value, 1800);
-//        timeSeconds = sampledData.first;
-//        value = sampledData.second;
+        //         DEBUG_LOG(" M4 聚合 ") ;
+        //        auto sampledData = ProcessData::m4Sample(timeSeconds, value, 1800);
+        //        timeSeconds = sampledData.first;
+        //        value = sampledData.second;
 
 
-//        qDebug() << " 执行时间:" << timer.elapsed() << "毫秒";
+        //         DEBUG_LOG(" 执行时间:" << timer.elapsed() << "毫秒") ;
 
 
-//        timer.restart(); // 计时重新开始
+        //        timer.restart(); // 计时重新开始
         // 创建折线图
         QCustomPlot* customPlot = qobject_cast<QCustomPlot*>(ui->pageLarge);
         if (customPlot)
@@ -1978,12 +2187,12 @@ void MainWindow::drawLargeLine()
             // 设置一些基本的customPlot配置：
             customPlot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
             customPlot->axisRect()->setupFullAxesBox(); // 四边安装轴并显示
-//            customPlot->setFixedSize(1900, 700);
+            //            customPlot->setFixedSize(1900, 700);
             customPlot->replot();//刷新图像
         }
 
         // 计算并输出经过的时间
-        qDebug()<<filePath << " 绘制图表 执行时间:" << timer.elapsed() << "毫秒";
+        DEBUG_LOG(filePath << " 绘制图表 执行时间:" << timer.elapsed() << "毫秒");
     }
 }
 void MainWindow::updateColumnScrollArea(QScrollArea* scrollArea,
@@ -2072,28 +2281,29 @@ void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
                 }
 
                 columnColors[columnName] = color;
-                qDebug() << "列名: "<<columnName<< "颜色: "<<color;
+                DEBUG_LOG("列名: "<<columnName<< "颜色: "<<color) ;
             }
         }
+        ui->horizontalSlider_k->setRange(1,totalColumns);
 
         // 选择最多5列（如果总列数不足5则选全部）
         int selectCount = qMin(5, totalColumns);
         int initAlpha = 0;
         selectedData = Util::M4GreedySelectColumns(rawData, selectCount, initAlpha);
-//      selectedData = Util::randomSelectColumns(rawData, selectCount);
+        //      selectedData = Util::randomSelectColumns(rawData, selectCount);
 
         updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
         updateColumnScrollArea(ui->scrollArea_original_column, rawData, columnColors);
 
         // === 绘制图表（使用颜色映射）===
-        DrawPlot::drawSelectedLineChart(ui->plot_representative, selectedData, columnColors);
+        DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
         DrawPlot::drawSelectedLineChart(ui->plot_original, rawData, columnColors);
 
     } catch (const std::exception& e) {
-        qDebug() << "Error in loadDatasetAndUpdateLine:" << e.what();
+        DEBUG_LOG("Error in loadDatasetAndUpdateLine:" << e.what()) ;
         throw; // 重新抛出给上层处理
     } catch (...) {
-        qDebug() << "Unknown error in loadDatasetAndUpdateLine";
+        DEBUG_LOG("Unknown error in loadDatasetAndUpdateLine") ;
         throw std::runtime_error("Unknown error occurred while loading dataset");
     }
 }
@@ -2126,10 +2336,10 @@ void MainWindow::initDatasetComboBox()
         }
 
     } catch (const std::exception& e) {
-        qDebug() << "Error in initDatasetComboBox:" << e.what();
+        DEBUG_LOG("Error in initDatasetComboBox:" << e.what()) ;
         QMessageBox::critical(this, "Error", QString("Failed to initialize dataset combo box: %1").arg(e.what()));
     } catch (...) {
-        qDebug() << "Unknown error in initDatasetComboBox";
+        DEBUG_LOG("Unknown error in initDatasetComboBox") ;
         QMessageBox::critical(this, "Error", "An unknown error occurred while initializing dataset combo box");
     }
 }
@@ -2176,10 +2386,10 @@ QMap<QString, int> MainWindow::classifyDataByColumnName(QString ColumnName)
     }
 
     // 输出聚合结果
-//    qDebug()<<endl<<"列名："<<ColumnName;
-//    for (auto it = aggregatedData.begin(); it != aggregatedData.end(); ++it) {
-//        qDebug() << "内容项:" << it.key() << " 数量:" << it.value();
-//    }qDebug()<<endl;
+    //     DEBUG_LOG(endl<<"列名："<<ColumnName);
+    //    for (auto it = aggregatedData.begin(); it != aggregatedData.end(); ++it) {
+    //         DEBUG_LOG("内容项:" << it.key() << " 数量:" << it.value()) ;
+    //    } DEBUG_LOG(endl);
     return aggregatedData;
 }
 
@@ -2214,12 +2424,12 @@ QVector<QString> MainWindow::getColumnDataByColumnName(QString ColumnName,int ro
                 }
             }
             else{
-                qDebug()<<"MainWindow::getColumnDataByColumnName: row is wrong!!";
+                DEBUG_LOG("MainWindow::getColumnDataByColumnName: row is wrong!!");
             }
         }
         return columnData;
     }
-    qDebug()<<ColumnName<<" 数据列为空";
+    DEBUG_LOG(ColumnName<<" 数据列为空");
     return columnData;  // 返回空的列数据
 }
 /**
@@ -2239,7 +2449,7 @@ QVector<QString> MainWindow::getColumnDataByColumnIndex(int index,int row)
             columnData.append(Data[index][i]);
         }
     }else{
-        qDebug()<<"MainWindow::getColumnDataByColumnIndex: row is wrong!!";
+        DEBUG_LOG("MainWindow::getColumnDataByColumnIndex: row is wrong!!");
     }
 
     return columnData;
@@ -2318,9 +2528,9 @@ void MainWindow::drawMultiLineChart(const QVector<QCheckBox*>& checkedCheckBoxLi
     // 更新布局
     ui->scrollArea_line->widget()->setLayout(lineChartLayout);
 
-//    for (const QFrame* draggableFrame : draggableFrames) {
-//        qDebug() << draggableFrame->objectName();
-//    }
+    //    for (const QFrame* draggableFrame : draggableFrames) {
+    //         DEBUG_LOG(draggableFrame->objectName()) ;
+    //    }
 }
 
 
@@ -2415,23 +2625,23 @@ void MainWindow::drawThreeDByDB()
     graph->axisY()->setTitleVisible(true);
     graph->axisZ()->setTitleVisible(true);
 
-//    // 如果有中文列名就设置为中文,否则设置为英文
-//    QStringList columnNames = handler.getColumnNames("rawdata");
-//    QString Latitude,Altitude,Longitude;
-//    if(columnNames.contains("安控信号"))
-//    {
-//        Latitude = "BD2/GPS2纬度";
-//        Altitude = "BD2/GPS2高度";
-//        Longitude = "BD2/GPS2经度";
-//    }
-//    else if(columnNames.contains("safetyControlSignal")){
-//        Latitude = "bd2Gps2Latitude";
-//        Altitude = "bd2Gps2Altitude";
-//        Longitude = "bd2Gps2Longitude";
-//    }
+    //    // 如果有中文列名就设置为中文,否则设置为英文
+    //    QStringList columnNames = handler.getColumnNames("rawdata");
+    //    QString Latitude,Altitude,Longitude;
+    //    if(columnNames.contains("安控信号"))
+    //    {
+    //        Latitude = "BD2/GPS2纬度";
+    //        Altitude = "BD2/GPS2高度";
+    //        Longitude = "BD2/GPS2经度";
+    //    }
+    //    else if(columnNames.contains("safetyControlSignal")){
+    //        Latitude = "bd2Gps2Latitude";
+    //        Altitude = "bd2Gps2Altitude";
+    //        Longitude = "bd2Gps2Longitude";
+    //    }
     // 创建散点图数据
     // 准备绘图数据:
-//    QVector<double> time = handler.getDataByColumn("飞行时间");
+    //    QVector<double> time = handler.getDataByColumn("飞行时间");
     QVector<double> rawLongitudedata = handler.getDataByColumn("BD2/GPS2纬度");
     QVector<double> rawLatitudedata = handler.getDataByColumn("BD2/GPS2高度");
     QVector<double> rawAltitudedata = handler.getDataByColumn( "BD2/GPS2经度");
@@ -2444,12 +2654,12 @@ void MainWindow::drawThreeDByDB()
 
     QtDataVisualization::QScatterDataArray data;
 
-    qDebug()<<"Longitudedata.size():"<<Longitudedata.size();
+    DEBUG_LOG("Longitudedata.size():"<<Longitudedata.size());
     if(Longitudedata.size()!=0)
     {
         for (int i = 0; i < Longitudedata.size(); i=i+10) {
             QVector3D point(Longitudedata[i], Latitudedata[i], Altitudedata[i]);
-//            qDebug()<<point;
+            //             DEBUG_LOG(point);
             data << point;
         }
     }
@@ -2466,7 +2676,7 @@ void MainWindow::drawThreeDByDB()
     graph->addSeries(series);
 
     // 调整轴的范围以适应数据
-    qDebug()<<"x max:"<<*std::min_element(Longitudedata.constBegin(), Longitudedata.constEnd())<<"x min:"<<*std::max_element(Longitudedata.constBegin(), Longitudedata.constEnd());
+    DEBUG_LOG("x max:"<<*std::min_element(Longitudedata.constBegin(), Longitudedata.constEnd())<<"x min:"<<*std::max_element(Longitudedata.constBegin(), Longitudedata.constEnd()));
     graph->axisX()->setRange(*std::min_element(Longitudedata.constBegin(), Longitudedata.constEnd()), *std::max_element(Longitudedata.constBegin(), Longitudedata.constEnd()));
     graph->axisY()->setRange(*std::min_element(Latitudedata.constBegin(), Latitudedata.constEnd()), *std::max_element(Latitudedata.constBegin(), Latitudedata.constEnd()));
     graph->axisZ()->setRange(*std::min_element(Altitudedata.constBegin(), Altitudedata.constEnd()), *std::max_element(Altitudedata.constBegin(), Altitudedata.constEnd()));
