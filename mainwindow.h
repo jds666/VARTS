@@ -59,8 +59,9 @@ private:
     void drawPiePlot(const QStringList& columnNames);
     void drawAnomalyDetection();
     void drawLargeLine();
-    void loadDatasetAndUpdateLine(const QString &selectedFile);
-    void initDatasetComboBox();
+    void initRepresentativePage(const QString &filePath);
+    void loadDatasetAndUpdateRepresentativePage(const QString &selectedFile);
+    void handleUploadButtonTriggered();
     void drawMultiLineChart(const QVector<QCheckBox*>& checkedCheckBoxList);
     void drawTablePlotByDB();
     void drawThreeDByDB();
@@ -94,7 +95,6 @@ private:
     QVector<QVector<QString>> rawData;     // 存放当前加载的数据集
     QVector<QVector<QString>> selectedData; // 当前选中的代表列
     QMap<QString, QColor> columnColors;    // 列名到颜色的映射
-    QString currentFile;                   // 当前选中的文件
     int selectedK = 5;
     double selectedAlpha = 0.0;
     QString selectedFolder;
@@ -125,7 +125,6 @@ private slots:
     void handleColumnTypeSplitterTriggered();
 
     void onComboBoxIndexChanged();
-    void onComboBoxDatasetChanged();
     void onPlayPauseButtonClicked();
     void onRestartButtonClicked();
     void updateLineChart();

@@ -79,8 +79,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>304</width>
-                 <height>331</height>
+                 <width>26</width>
+                 <height>16</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -199,8 +199,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>640</width>
-                  <height>485</height>
+                  <width>73</width>
+                  <height>16</height>
                  </rect>
                 </property>
                </widget>
@@ -428,7 +428,7 @@
              </layout>
             </item>
             <item>
-             <widget class="QLabel" name="label_load_data">
+             <widget class="QLabel" name="label_upload_data">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -436,17 +436,14 @@
                </sizepolicy>
               </property>
               <property name="text">
-               <string>load data</string>
+               <string>upload data</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QComboBox" name="comboBox_datasets">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
+             <widget class="QPushButton" name="uploadButton">
+              <property name="text">
+               <string>Click to Upload Dataset</string>
               </property>
              </widget>
             </item>
@@ -533,7 +530,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>140</width>
-                   <height>260</height>
+                   <height>261</height>
                   </rect>
                  </property>
                 </widget>
@@ -563,7 +560,7 @@
                    <x>0</x>
                    <y>0</y>
                    <width>140</width>
-                   <height>260</height>
+                   <height>261</height>
                   </rect>
                  </property>
                 </widget>

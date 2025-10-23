@@ -47,13 +47,13 @@ QVector<QVector<QString>> Util::readCSVWithColumnNames(const QString &filePath)
     return data;
 }
 
-void Util::splitCsvByColumnType(const QString &filePath)
+QString Util::splitCsvByColumnType(const QString &filePath)
 {
     QFile csvFile(filePath);
     if (!csvFile.open(QIODevice::ReadOnly | QIODevice::Text))
     {
         QMessageBox::warning(nullptr, "错误", "无法打开 CSV 文件：" + csvFile.errorString());
-        return;
+        return QString();
     }
 
     QTextStream in(&csvFile);
@@ -65,7 +65,7 @@ void Util::splitCsvByColumnType(const QString &filePath)
     {
         QMessageBox::warning(nullptr, "错误", "文件为空或无法读取列名。");
         csvFile.close();
-        return;
+        return QString();
     }
 
     QStringList columnNames = headerLine.trimmed().split(',', QString::SkipEmptyParts);
@@ -117,19 +117,22 @@ void Util::splitCsvByColumnType(const QString &filePath)
     if (!numFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         QMessageBox::warning(nullptr, "错误", "无法写入数值列文件：" + numFile.errorString());
-        return;
+        return QString();
     }
     if (!textFile.open(QIODevice::WriteOnly | QIODevice::Text))
     {
         QMessageBox::warning(nullptr, "错误", "无法写入文本列文件：" + textFile.errorString());
         numFile.close();
-        return;
+        return QString();
     }
 
     QTextStream numOut(&numFile);
     QTextStream textOut(&textFile);
     numOut.setCodec("UTF-8");
     textOut.setCodec("UTF-8");
+    // 添加这行：显式设置生成BOM
+    numOut.setGenerateByteOrderMark(true);
+    textOut.setGenerateByteOrderMark(true);
 
     // === 5. 写入表头 ===
     QStringList numHeaders, textHeaders;
@@ -170,6 +173,8 @@ void Util::splitCsvByColumnType(const QString &filePath)
             .arg(textFilePath);
 
     QMessageBox::information(nullptr, "拆分完成", message);
+
+    return numFilePath;
 }
 
 

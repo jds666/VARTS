@@ -23,7 +23,7 @@ public:
     // 读数据
     static QVector<QVector<QString>> readCSVWithColumnNames(const QString &filePath);
     // 拆分CSV为数值列和文本列两个文件
-    static void splitCsvByColumnType(const QString &filePath);
+    static QString splitCsvByColumnType(const QString &filePath);
 
     // 随机选择k列数据（包含列名）
     static QVector<QVector<QString>> randomSelectColumns(const QVector<QVector<QString>> &rawData, int k);

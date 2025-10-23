@@ -170,13 +170,11 @@ MainWindow::MainWindow(QWidget *parent)
     tracer->setInterpolating(false);//游标禁用插值
     tracer->setGraph(ui->pageAd->graph(0));// 设置游标吸附在ui->pageAd->graph(0)这条曲线上
 
-    initDatasetComboBox();// 代表性选择功能的初始点
-
-
+    // 绑定上传自定义_numColumn.csv数据集按钮
+    connect(ui->uploadButton, &QPushButton::clicked ,this, &MainWindow::handleUploadButtonTriggered);
 
     // 更换下拉框内容
     connect(ui->comboBox, SIGNAL(activated(int)), this, SLOT(onComboBoxIndexChanged()));
-    connect(ui->comboBox_datasets, SIGNAL(activated(int)), this, SLOT(onComboBoxDatasetChanged()));
 
     //动态展示
     // 初始化播放状态和定时器
@@ -868,6 +866,8 @@ void MainWindow::handleActionCsvTriggered()
 
         initialPlot(columnNames); // 初始化绘图
 
+        initRepresentativePage(filePath);// 代表性选择功能集成
+
     }
 }
 /**
@@ -1140,22 +1140,6 @@ void MainWindow::onComboBoxIndexChanged()
     else
     {
         DEBUG_LOG("onComboBoxIndexChanged no inputstatus == 3");
-    }
-}
-
-void MainWindow::onComboBoxDatasetChanged()
-{
-    try {
-        ui->statusbar->showMessage("正在更新数据。。。");
-        QString selectedFile = ui->comboBox_datasets->currentText();
-        loadDatasetAndUpdateLine(selectedFile);
-        ui->statusbar->showMessage("更新完成,数据集:"+selectedFile);
-    } catch (const std::exception& e) {
-        DEBUG_LOG("Error in onComboBoxDatasetChanged:" << e.what()) ;
-        QMessageBox::critical(this, "Error", QString("Failed to process dataset: %1").arg(e.what()));
-    } catch (...) {
-        DEBUG_LOG( "Unknown error in onComboBoxDatasetChanged");
-        QMessageBox::critical(this, "Error", "An unknown error occurred while processing dataset");
     }
 }
 
@@ -2232,13 +2216,17 @@ void MainWindow::updateColumnScrollArea(QScrollArea* scrollArea,
     scrollArea->setWidget(scrollWidget);
 }
 
-void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
+void MainWindow::initRepresentativePage(const QString &filePath)
+{
+    QString numFilePath = Util::splitCsvByColumnType(filePath);
+    loadDatasetAndUpdateRepresentativePage(numFilePath);
+}
+void MainWindow::loadDatasetAndUpdateRepresentativePage(const QString &selectedFile)
 {
     try {
         if (selectedFile.isEmpty()) return;
 
-        currentFile = selectedFolder + "/" + selectedFile;
-        rawData = Util::readCSVWithColumnNames(currentFile);
+        rawData = Util::readCSVWithColumnNames(selectedFile);
 
         // 检查数据是否为空
         if (rawData.isEmpty()) {
@@ -2308,56 +2296,16 @@ void MainWindow::loadDatasetAndUpdateLine(const QString &selectedFile)
     }
 }
 
-
-void MainWindow::initDatasetComboBox()
+void MainWindow::handleUploadButtonTriggered()
 {
-    try {
-        selectedFolder = R"(E:\QTProgram\QT-FlyDataVisual_AnomalyDetection\time_series_visualization_01\data\Processed_Flydata)";
-        QDir dir(selectedFolder);
-
-        // 检查目录是否存在
-        if (!dir.exists()) {
-            throw std::runtime_error("Selected folder does not exist: " + selectedFolder.toStdString());
-        }
-
-        QStringList csvFiles = dir.entryList(QStringList() << "*.csv", QDir::Files);
-
-        ui->comboBox_datasets->clear();
-        ui->comboBox_datasets->addItems(csvFiles);
-
-        if (!csvFiles.isEmpty()) {
-            // 默认显示第5个文件
-            int defaultIndex = qMin(5, csvFiles.size() - 1);
-            ui->comboBox_datasets->setCurrentIndex(defaultIndex);
-            loadDatasetAndUpdateLine(csvFiles[defaultIndex]);
-        } else {
-            qWarning() << "No CSV files found in directory:" << selectedFolder;
-            QMessageBox::warning(this, "Warning", "No CSV files found in the selected directory");
-        }
-
-    } catch (const std::exception& e) {
-        DEBUG_LOG("Error in initDatasetComboBox:" << e.what()) ;
-        QMessageBox::critical(this, "Error", QString("Failed to initialize dataset combo box: %1").arg(e.what()));
-    } catch (...) {
-        DEBUG_LOG("Unknown error in initDatasetComboBox") ;
-        QMessageBox::critical(this, "Error", "An unknown error occurred while initializing dataset combo box");
-    }
+    ui->statusbar->showMessage("正在更新数据，请稍等。。。");
+    QString filePath = QFileDialog::getOpenFileName(this, "选择 CSV 文件", "", "CSV 文件 (*.csv)");
+    if (filePath.isEmpty())
+        return;
+    loadDatasetAndUpdateRepresentativePage(filePath);
+    ui->statusbar->showMessage("数据集更新完成");
 }
-//void MainWindow::drawSelectedLine()
-//{
-//    // 绑定滑杆(ui->horizontalSlider_k、ui->horizontalSlider_alpha)和参数(k、alpha)，这个参数用于文本标签（ui->label_k_num、ui->label_alpha_num）与图像选择线条的数量（选择k个线条、平衡参数alpha）
 
-//    // 设置数据集选择框(ui->comboBox_datasets中设置为E:\QTProgram\QT-FlyDataVisual_AnomalyDetection\time_series_visualization_01\data\Processed_Flydata文件夹下的csv名称供选择)
-
-//    // 选择数据后，根据“文件名”导入数据（局部变量Qvector<Qvector<double>> rawdata）
-
-//    // 使用随机选择数据算法函数 选数据到 selectedata（Qvector<Qvector<double>>）
-
-//    // 将选到的数据的列名放进 ui->scrollArea_selected_column
-
-//    // 绘图到 customPlot = qobject_cast<QCustomPlot*>(ui->plot_representative);和ui->plot_original
-
-//}
 
 QChartView* MainWindow::createChartView(QPieSeries *series, const QString& title)
 {
