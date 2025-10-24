@@ -80,6 +80,13 @@ private:
 
     QString timeColumnName; // 横坐标:“飞行时间”或者“FXSJ”或者“flightTime”或者第一列的列名
 
+    // 代表选择的预处理数据
+    QVector<QVector<double>> m4SampledData; // 用于贪心的压缩后数据
+    QVector<QVector<double>> cachedDtwMatrix; // DTW预计算矩阵
+    QVector<double> cachedAvgValues; // 平均距离矩阵
+    QVector<int> cachedValidIndices; // rawdata数值列索引
+    bool isCacheValid = false; // 缓存是否可用
+
     // 数据类型分类
     QSet<QString> textColumn;
     QSet<QString> numColumn;
@@ -116,6 +123,7 @@ private:
                                             const QVector<QVector<QString>>& data,
                                             const QMap<QString, QColor>& colorMap,
                                             const QString& emptyText = "No data available");
+    void updateSelectedDataAndPlot();
 private slots:
     // 槽函数（内部信号响应）
     void handleActionExcelTriggered();

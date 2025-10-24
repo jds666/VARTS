@@ -20,6 +20,7 @@ public:
     static std::pair<QVector<double>, QVector<double>> intervalAverageSample(const QVector<double>& timeSeconds, const QVector<double>& value, int targetPoints);
     static std::pair<QVector<double>, QVector<double>> maxMinSample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval);
     static std::pair<QVector<double>, QVector<double>> m4Sample(const QVector<double>& timeSeconds, const QVector<double>& value, int interval);
+    static QVector<QVector<double>> m4SampleBatch(const QVector<QVector<QString>>& rawData, const QVector<int>& validColumnIndices, int targetPoints = 1000); // 批量 M4 降采样
 
     // 代表数据选择
     static double dtwDistanceFast(const QVector<double>& seq1, const QVector<double>& seq2, int window = 10);

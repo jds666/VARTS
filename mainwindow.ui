@@ -30,7 +30,7 @@
     <item row="2" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="pageLine">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -40,7 +40,7 @@
            <enum>Qt::Horizontal</enum>
           </property>
           <widget class="QWidget" name="layoutWidget">
-           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,5,1,1,1">
+           <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0,0,0,5,1,1,1">
             <item>
              <widget class="QFrame" name="frame">
               <property name="frameShape">
@@ -48,6 +48,13 @@
               </property>
               <property name="frameShadow">
                <enum>QFrame::Raised</enum>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="label_2">
+              <property name="text">
+               <string>Control Single Feature (for Univariate, Scatter, Boxplot)</string>
               </property>
              </widget>
             </item>
@@ -70,6 +77,13 @@
              </widget>
             </item>
             <item>
+             <widget class="QLabel" name="label_3">
+              <property name="text">
+               <string>Control Multivariate Features</string>
+              </property>
+             </widget>
+            </item>
+            <item>
              <widget class="QScrollArea" name="scrollArea_checkbox">
               <property name="widgetResizable">
                <bool>true</bool>
@@ -79,8 +93,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>26</width>
-                 <height>16</height>
+                 <width>384</width>
+                 <height>288</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -165,7 +179,7 @@
           </widget>
           <widget class="QTabWidget" name="tab">
            <property name="currentIndex">
-            <number>3</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="tab_singal_line">
             <attribute name="title">
@@ -199,8 +213,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>73</width>
-                  <height>16</height>
+                  <width>560</width>
+                  <height>485</height>
                  </rect>
                 </property>
                </widget>
@@ -276,6 +290,9 @@
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <item>
          <widget class="QSplitter" name="splitter_paramter_plot">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
             <horstretch>3</horstretch>
@@ -529,7 +546,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>140</width>
+                   <width>135</width>
                    <height>261</height>
                   </rect>
                  </property>
@@ -559,7 +576,7 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>140</width>
+                   <width>135</width>
                    <height>261</height>
                   </rect>
                  </property>
@@ -596,9 +613,9 @@
            <property name="frameShadow">
             <enum>QFrame::Raised</enum>
            </property>
-           <layout class="QHBoxLayout" name="horizontalLayout_3">
+           <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,4,1,4">
             <item>
-             <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,4,1,4">
+             <layout class="QHBoxLayout" name="horizontalLayout_3">
               <item>
                <widget class="QLabel" name="label_5">
                 <property name="sizePolicy">
@@ -613,15 +630,39 @@
                </widget>
               </item>
               <item>
-               <widget class="QCustomPlot" name="plot_representative" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <spacer name="horizontalSpacer_7">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_selected_plot_time">
+                <property name="text">
+                 <string>selected plot time</string>
                 </property>
                </widget>
               </item>
+             </layout>
+            </item>
+            <item>
+             <widget class="QCustomPlot" name="plot_representative" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <layout class="QHBoxLayout" name="horizontalLayout_7">
               <item>
                <widget class="QLabel" name="label_6">
                 <property name="sizePolicy">
@@ -636,16 +677,36 @@
                </widget>
               </item>
               <item>
-               <widget class="QCustomPlot" name="plot_original" native="true">
-                <property name="sizePolicy">
-                 <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-                  <horstretch>0</horstretch>
-                  <verstretch>0</verstretch>
-                 </sizepolicy>
+               <spacer name="horizontalSpacer_8">
+                <property name="orientation">
+                 <enum>Qt::Horizontal</enum>
+                </property>
+                <property name="sizeHint" stdset="0">
+                 <size>
+                  <width>40</width>
+                  <height>20</height>
+                 </size>
+                </property>
+               </spacer>
+              </item>
+              <item>
+               <widget class="QLabel" name="label_original_plot_time">
+                <property name="text">
+                 <string>original plot time</string>
                 </property>
                </widget>
               </item>
              </layout>
+            </item>
+            <item>
+             <widget class="QCustomPlot" name="plot_original" native="true">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+             </widget>
             </item>
            </layout>
           </widget>
@@ -825,7 +886,7 @@
   </action>
   <action name="action_ad">
    <property name="text">
-    <string>异常检测</string>
+    <string>Anomaly Detection</string>
    </property>
   </action>
   <action name="action_OpenGauss">
@@ -840,7 +901,7 @@
   </action>
   <action name="action_large">
    <property name="text">
-    <string>大规模数据测试</string>
+    <string>Large-Scale Data Testing</string>
    </property>
   </action>
   <action name="action_representative">

@@ -28,7 +28,11 @@ public:
     // 随机选择k列数据（包含列名）
     static QVector<QVector<QString>> randomSelectColumns(const QVector<QVector<QString>> &rawData, int k);
     // M4Greedy算法选择k条数据，平衡因子是alpha
-    static QVector<QVector<QString>> M4GreedySelectColumns(const QVector<QVector<QString>> &rawData, int k, double alpha);
+    static QVector<QVector<QString>> M4GreedySelectColumns(const QVector<QVector<QString>> &rawData, int k, double alpha,
+                                                               QVector<QVector<double>>* out_sampledData = nullptr,
+                                                               QVector<QVector<double>>* out_dtwMatrix = nullptr,
+                                                               QVector<double>* out_avgValues = nullptr,
+                                                               QVector<int>* out_validIndices = nullptr);
 
     // 加载语言文件
     static bool loadLanguageFile(const QString& langCode);

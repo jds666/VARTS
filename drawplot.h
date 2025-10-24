@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QString>
 #include <QDebug>
+#include <QElapsedTimer>
 
 // Third-party libraries
 #include "qcustomplot.h"
@@ -33,9 +34,9 @@ public:
     static void drawBoxPlotByDB(QCustomPlot* Plot, const QVector<double>& ydata, const QString &label);
 
     // 被选中的几条线绘制在一张图里面
-    static void drawSelectedLineChart(QCustomPlot* Plot, const QVector<QVector<QString>>& myData, const QMap<QString, QColor> &columnColors);
+    static double drawSelectedLineChart(QCustomPlot* Plot, const QVector<QVector<QString>>& myData, const QMap<QString, QColor> &columnColors);
     // 绘制M4采样之后的数据
-    static void drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors);
+    static double drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors);
 
     // 滑动平均函数
     static void applySlidingAverageWithStep(const QVector<double>& x, const QVector<double>& y, int windowSize, QVector<double>& smoothedX, QVector<double>& smoothedY);

@@ -25,7 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
         DEBUG_LOG("数据库连接失败");
     }
     // 语言加载
-    Util::loadLanguageFile("zh_CN"); // 默认中文，可改成 "en_US" 切换英文
+    Util::loadLanguageFile("en_US"); // 可改成 "zh_CN" 切换中文，可改成 "en_US" 切换英文
 
     //列名分类
     numColumn = {"俯仰角", "滚转角", "航迹角", "俯仰角速度", "滚转角速度", "偏航角速度", "飞行时间", "升降舵反馈", "左副翼舵反馈", "右副翼舵反馈", "方向舵反馈",
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent)
     //    setupPlot();
     //设置标题
 
-    setWindowTitle("FTsViz");
+    setWindowTitle("VARTS");
 
     setWindowIcon(QIcon(":/visual"));
     ui->speedlabel->setAlignment(Qt::AlignCenter);  // 设置居中对齐
@@ -116,7 +116,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->action_ad->setIcon(adIcon);
     ui->action_ad->setIconText("Anomaly Detection");  // 设置文本
-    ui->action_ad->setText("异常检测");  // 设置工具提示文本
+    ui->action_ad->setText("Anomaly Detection");  // 设置工具提示文本
     ui->action_table->setIcon(tableIcon);
     ui->action_table->setIconText("Table");
     ui->action_table->setText("概况表");
@@ -449,9 +449,7 @@ void MainWindow::handleSelectKValueChanged()
 
     if (!rawData.isEmpty()) {
         QTimer::singleShot(200, this, [this]() {
-            selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
-            updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
-            DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
+            updateSelectedDataAndPlot();
         });
     }
 }
@@ -463,13 +461,28 @@ void MainWindow::handleSelectAlphaValueChanged()
 
     if (!rawData.isEmpty()) {
         QTimer::singleShot(200, this, [this]() {
-            selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha);
-            updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
-            DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
+            updateSelectedDataAndPlot();
         });
     }
 }
+void MainWindow::updateSelectedDataAndPlot()
+{
+    if (rawData.isEmpty()) return;
 
+    QElapsedTimer timer;
+    timer.start();
+
+    selectedData = Util::M4GreedySelectColumns(rawData, selectedK, selectedAlpha,
+                                               &m4SampledData, &cachedDtwMatrix, &cachedAvgValues, &cachedValidIndices); // 传入缓存，触发复用
+    double M4GreedySelectTime = timer.elapsed() / 1000.0;
+
+    updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
+    double RepresentativeDrawTime = DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
+
+    ui->label_selected_plot_time->setText(QString("M4GreedySelectTime:%1s DrawTime:%2s")
+                                          .arg(M4GreedySelectTime, 0, 'f', 3)
+                                          .arg(RepresentativeDrawTime, 0, 'f', 3));
+}
 
 void MainWindow::handleCheckBoxStateChanged(int state)
 {
@@ -1328,7 +1341,6 @@ QCustomPlot *MainWindow::createLineChart(const QString& yText)
     return customPlot;
 }
 
-
 void MainWindow::drawTablePlot(const QVector<QVector<QString>>& Data)
 {
     if (!ui->tableWidget || !ui->comboBox) {
@@ -1336,60 +1348,56 @@ void MainWindow::drawTablePlot(const QVector<QVector<QString>>& Data)
         return;
     }
 
-    // 检查数据是否为空
     if (Data.isEmpty()) {
         qWarning("Data is empty!");
         return;
     }
-    // 清除现有内容
+
+    // ✅ 清除现有内容
     ui->tableWidget->clear();
 
-    // 设置表格的默认字体
+    // 设置表格字体
     QFont tableFont;
-    tableFont.setPointSize(13); // 设置字体大小为13
-    ui->tableWidget->setFont(tableFont);    // 为表格单元格设置字体
-    ui->tableWidget->horizontalHeader()->setFont(tableFont);    // 为水平表头设置字体
-    ui->tableWidget->verticalHeader()->setFont(tableFont);  // 为垂直表头（行号）设置字体
+    tableFont.setPointSize(13);
+    ui->tableWidget->setFont(tableFont);
+    ui->tableWidget->horizontalHeader()->setFont(tableFont);
+    ui->tableWidget->verticalHeader()->setFont(tableFont);
 
-    // 设置表格的行数和列数
-    int rowCount = Data[0].size() - 1; // 假设第一行是表头，不计入数据行, 全部数据是 Data[0].size() - 1
+    // ✅ 获取数据行数，但最多显示 1000 行
+    int maxRowsToShow = 1000;
+    int dataRowCount = Data[0].size() - 1; // 排除列名
+    int rowCount = qMin(dataRowCount, maxRowsToShow);
     int colCount = Data.size();
 
-    // 创建一个二维数组来存储所有的 QTableWidgetItem
-    QVector<QVector<QTableWidgetItem*>> items(rowCount, QVector<QTableWidgetItem*>(colCount));
-
-    // 提前准备好所有的 QTableWidgetItem
-    for (int col = 0; col < colCount; ++col) {
-        for (int row = 1; row <= rowCount; ++row) { // 从第二行开始填充数据
-            QString cellData = Data[col][row];
-            items[row - 1][col] = new QTableWidgetItem(cellData);
-        }
-    }
-
-    // 暂时禁用信号，避免每次 setItem 触发信号
+    // ✅ 暂时禁用信号
     ui->tableWidget->blockSignals(true);
 
-    // 设置表格的行数和列数
+    // 设置行列数
     ui->tableWidget->setRowCount(rowCount);
     ui->tableWidget->setColumnCount(colCount);
 
-    // 设置表头（可选）
+    // 设置表头
     QStringList headers;
     for (int i = 0; i < colCount; ++i) {
-        headers << Data[i][0]; // 假设每一列的第一项是表头
+        headers << Data[i][0]; // 第0行是列名
     }
     ui->tableWidget->setHorizontalHeaderLabels(headers);
 
-    // 一次性将所有 QTableWidgetItem 设置到表格中
-    for (int row = 0; row < rowCount; ++row) {
+    // 逐行填充数据（从第1行开始取数据，最多取1000行）
+    for (int row = 1; row <= rowCount; ++row) { // rawData 的第1~1000行
         for (int col = 0; col < colCount; ++col) {
-            ui->tableWidget->setItem(row, col, items[row][col]);
+            QString cellData = Data[col][row];
+            ui->tableWidget->setItem(row - 1, col, new QTableWidgetItem(cellData));
         }
     }
 
     // 恢复信号
     ui->tableWidget->blockSignals(false);
 
+    // 可选：显示提示信息
+    if (dataRowCount > maxRowsToShow) {
+        qDebug() << "Table truncated: showing first" << maxRowsToShow << "rows out of" << dataRowCount;
+    }
 }
 
 void MainWindow::drawThreeD(const QVector<QString>& timeData)
@@ -2277,15 +2285,37 @@ void MainWindow::loadDatasetAndUpdateRepresentativePage(const QString &selectedF
         // 选择最多5列（如果总列数不足5则选全部）
         int selectCount = qMin(5, totalColumns);
         int initAlpha = 0;
-        selectedData = Util::M4GreedySelectColumns(rawData, selectCount, initAlpha);
+
+        QElapsedTimer timer;
+        timer.start(); // 开始计时
+
+        // === 清除旧缓存 ===
+        isCacheValid = false;
+        m4SampledData.clear();
+        cachedDtwMatrix.clear();
+        cachedAvgValues.clear();
+        // === 首次调用：强制计算并填充缓存 ===
+        selectedData = Util::M4GreedySelectColumns(
+            rawData, selectCount, initAlpha,
+            &m4SampledData, &cachedDtwMatrix, &cachedAvgValues, &cachedValidIndices
+        );
+        isCacheValid = true; // 标记缓存有效
         //      selectedData = Util::randomSelectColumns(rawData, selectCount);
+
+        double M4GreedySelectTime = timer.elapsed() / 1000.0;
 
         updateColumnScrollArea(ui->scrollArea_selected_column, selectedData, columnColors);
         updateColumnScrollArea(ui->scrollArea_original_column, rawData, columnColors);
 
         // === 绘制图表（使用颜色映射）===
-        DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
-        DrawPlot::drawSelectedLineChart(ui->plot_original, rawData, columnColors);
+        double RepresentativeDrawTime = DrawPlot::drawSelectedLineChartByM4Sample(ui->plot_representative, selectedData, columnColors);
+        double originalDrawTime = DrawPlot::drawSelectedLineChart(ui->plot_original, rawData, columnColors);
+
+        //设置标签 label_original_plot_time、label_selected_plot_time
+        ui->label_selected_plot_time->setText(QString("M4GreedySelectTime:%1 DrawTime:%2")
+                                              .arg(M4GreedySelectTime, 0, 'f', 3)
+                                              .arg(RepresentativeDrawTime, 0, 'f', 3));
+        ui->label_original_plot_time->setText(QString("DrawTime:%1").arg(originalDrawTime, 0, 'f', 3));
 
     } catch (const std::exception& e) {
         DEBUG_LOG("Error in loadDatasetAndUpdateLine:" << e.what()) ;
@@ -2298,14 +2328,13 @@ void MainWindow::loadDatasetAndUpdateRepresentativePage(const QString &selectedF
 
 void MainWindow::handleUploadButtonTriggered()
 {
-    ui->statusbar->showMessage("正在更新数据，请稍等。。。");
+    ui->statusbar->showMessage("Updating data, please wait...");
     QString filePath = QFileDialog::getOpenFileName(this, "选择 CSV 文件", "", "CSV 文件 (*.csv)");
     if (filePath.isEmpty())
         return;
     loadDatasetAndUpdateRepresentativePage(filePath);
-    ui->statusbar->showMessage("数据集更新完成");
+    ui->statusbar->showMessage("Dataset updated successfully");
 }
-
 
 QChartView* MainWindow::createChartView(QPieSeries *series, const QString& title)
 {

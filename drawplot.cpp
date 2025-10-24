@@ -385,10 +385,14 @@ void DrawPlot::drawBoxPlotByDB(QCustomPlot* Plot,  const QVector<double> &ydata,
     }
 }
 
-void DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
+double DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
 {
+    QElapsedTimer timer;
+    timer.start(); // 开始计时
+
     QCustomPlot* plot = qobject_cast<QCustomPlot*>(Plot);
-    if (!plot || myData.isEmpty()) return;
+    if (!plot || myData.isEmpty()) return timer.elapsed() / 1000.0; // 如果数据为空或转换失败，返回已过时间（秒）
+
     plot->clearGraphs();
 
     for (int i = 0; i < myData.size(); ++i) {
@@ -451,12 +455,19 @@ void DrawPlot::drawSelectedLineChart(QCustomPlot *Plot, const QVector<QVector<QS
 
     // 重绘图表
     plot->replot();
+
+    //  返回经过的时间（秒）
+    return timer.elapsed() / 1000.0;
 }
 
-void DrawPlot::drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
+double DrawPlot::drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<QVector<QString>> &myData, const QMap<QString, QColor> &columnColors)
 {
+    QElapsedTimer timer;
+    timer.start(); // 开始计时
+
     QCustomPlot* plot = qobject_cast<QCustomPlot*>(Plot);
-    if (!plot || myData.isEmpty()) return;
+    if (!plot || myData.isEmpty()) return timer.elapsed() / 1000.0; // 如果数据为空或转换失败，返回已过时间（秒）
+
     plot->clearGraphs();
 
     const int targetPoints = 1000; // 直接使用1000个目标点
@@ -506,6 +517,9 @@ void DrawPlot::drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVector<
     plot->setFixedWidth(1000 + plot->axisRect()->margins().left() + plot->axisRect()->margins().right());
     plot->setAntialiasedElements(QCP::aeAll);
     plot->replot();
+
+    //  返回经过的时间（秒）
+    return timer.elapsed() / 1000.0;
 }
 
 // 滑动平均函数：步长等于窗口大小

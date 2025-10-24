@@ -168,11 +168,11 @@ QString Util::splitCsvByColumnType(const QString &filePath)
 
     // === 7. 弹窗提示 ===
     QString message =
-        QString("✅ 文件拆分完成！\n\n数值列文件：%1\n文本列文件：%2")
+        QString("✅ File splitting completed!\n\nNumeric columns file: %1\nText columns file: %2")
             .arg(numFilePath)
             .arg(textFilePath);
 
-    QMessageBox::information(nullptr, "拆分完成", message);
+    QMessageBox::information(nullptr, "Splitting Completed", message);
 
     return numFilePath;
 }
@@ -206,7 +206,11 @@ QVector<QVector<QString>> Util::randomSelectColumns(const QVector<QVector<QStrin
 }
 
 QVector<QVector<QString>> Util::M4GreedySelectColumns(
-    const QVector<QVector<QString>>& rawData, int k, double alpha)
+    const QVector<QVector<QString>>& rawData, int k, double alpha,
+        QVector<QVector<double>>* out_sampledData,
+        QVector<QVector<double>>* out_dtwMatrix,
+        QVector<double>* out_avgValues,
+        QVector<int>* out_validIndices)
 {
     QVector<QVector<QString>> selected;
 
@@ -221,7 +225,7 @@ QVector<QVector<QString>> Util::M4GreedySelectColumns(
     }
 
     // ===== Step 1. 过滤空列并记录列名和原始索引 =====
-    QVector<int> validIndices;
+    QVector<int> validIndices; // 数值列的索引
     QVector<QString> columnNames;
     for (int colIdx = 0; colIdx < rawData.size(); ++colIdx) {
         const auto& col = rawData[colIdx];
@@ -246,34 +250,47 @@ QVector<QVector<QString>> Util::M4GreedySelectColumns(
         return selected;
     }
 
-    int n = validIndices.size();
+//    int n = validIndices.size();
 
-    // ===== Step 2. M4 采样降维 =====
-    QVector<QVector<double>> sampledData(n);
-    for (int i = 0; i < n; ++i) {
-        const auto& col = rawData[validIndices[i]];
-        QVector<double> series;
-        series.reserve(col.size() - 1);
-        for (int r = 1; r < col.size(); ++r) {
-            bool ok = false;
-            double val = col[r].toDouble(&ok);
-            if (ok) series.append(val);
-        }
+    // ===== 判断是否需要重新计算中间结果 =====
+    bool needRecompute = true;
 
-        QVector<double> time(series.size());
-        std::iota(time.begin(), time.end(), 0);
-        auto sampled = ProcessData::m4Sample(time, series, rawData[0].size()/1000);
-        sampledData[i] = std::move(sampled.second); // 只保存降采样值
+    // 如果传入了 out 参数，并且它们非空，说明调用方想缓存
+    if (out_sampledData && !out_sampledData->isEmpty()) {
+        // 假设我们用 sampledData 是否为空判断缓存是否有效
+        needRecompute = false;
     }
 
-    // ===== Step 3. 计算 DTW 矩阵 =====
-    int window = 10;
-     DEBUG_LOG("计算全局 DTW 矩阵。。。") ;
-    QVector<QVector<double>> dtwMatrix = ProcessData::computeDtwMatrix(sampledData, window);
+    QVector<QVector<double>> sampledData;
+    QVector<QVector<double>> dtwMatrix;
+    QVector<double> avgValues;
 
-    // ===== Step 4. 计算平均距离矩阵 =====
-     DEBUG_LOG("计算平均距离矩阵。。。") ;
-    QVector<double> avgValues = ProcessData::computeAverageMatrix(dtwMatrix);
+    if (needRecompute) {
+        // --- Step 2. M4 降采样 ---
+        sampledData = ProcessData::m4SampleBatch(rawData, validIndices, 100);
+
+        // --- Step 3. DTW 矩阵 ---
+        int window = 10;
+        DEBUG_LOG("计算全局 DTW 矩阵。。。");
+        dtwMatrix = ProcessData::computeDtwMatrix(sampledData, window);
+
+        // --- Step 4. 平均距离 ---
+        DEBUG_LOG("计算平均距离矩阵。。。");
+        avgValues = ProcessData::computeAverageMatrix(dtwMatrix);
+
+        // 保存到输出参数（如果调用方需要）
+        if (out_sampledData) *out_sampledData = sampledData;
+        if (out_dtwMatrix)  *out_dtwMatrix  = dtwMatrix;
+        if (out_avgValues)  *out_avgValues  = avgValues;
+        if (out_validIndices) *out_validIndices = validIndices;
+    }
+    else {
+        // 复用缓存
+        sampledData = *out_sampledData;
+        dtwMatrix   = *out_dtwMatrix;
+        avgValues   = *out_avgValues;
+        // validIndices 不需要复用，因为每次都能重建
+    }
 
     // ===== Step 5. 贪心选择索引 =====
      DEBUG_LOG("调用贪心选择算法。。。参数 k:" << k << " alpha: " << alpha) ;
@@ -284,10 +301,9 @@ QVector<QVector<QString>> Util::M4GreedySelectColumns(
     for (int relIdx : selectedRelativeIndices) {
         if (relIdx >= 0 && relIdx < validIndices.size()) {
             int origIdx = validIndices[relIdx]; // 原 rawData 列索引
-            selected.append(rawData[origIdx]);
+            selected.append(rawData[origIdx]); // 原 rawData 列
         }
     }
-
     return selected;
 }
 

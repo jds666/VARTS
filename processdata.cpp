@@ -405,6 +405,43 @@ std::pair<QVector<double>, QVector<double>> ProcessData::m4Sample(const QVector<
     return sampledData;
 }
 
+QVector<QVector<double> > ProcessData::m4SampleBatch(const QVector<QVector<QString> > &rawData, const QVector<int> &validColumnIndices, int targetPoints)
+{
+    QVector<QVector<double>> sampledData;
+    sampledData.reserve(validColumnIndices.size());
+
+    for (int i = 0; i < validColumnIndices.size(); ++i) {
+        const auto& col = rawData[validColumnIndices[i]];
+
+        // 提取数值序列（跳过列名）
+        QVector<double> series;
+        series.reserve(col.size() - 1);
+        for (int r = 1; r < col.size(); ++r) {
+            bool ok = false;
+            double val = col[r].toDouble(&ok);
+            if (ok) {
+                series.append(val);
+            }
+        }
+
+        if (series.isEmpty()) {
+            // 返回空序列（调用者可处理）
+            sampledData.append(QVector<double>());
+            continue;
+        }
+
+        // 生成时间轴
+        QVector<double> time(series.size());
+        std::iota(time.begin(), time.end(), 0);
+
+        // 执行 M4 降采样
+        auto sampled = m4Sample(time, series, targetPoints);
+        sampledData.append(std::move(sampled.second)); // 只保留值
+    }
+
+    return sampledData;
+}
+
 // DTW 距离计算
 double ProcessData::dtwDistanceFast(const QVector<double>& seq1,
                                     const QVector<double>& seq2,
