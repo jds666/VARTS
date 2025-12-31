@@ -1,6 +1,7 @@
 // drawplot.cpp
 #include "drawplot.h"
 
+double DrawPlot::epsilonDrawPlot = 0.0;
 
 /**
  * @brief DrawPlot::drawLineChart
@@ -13,10 +14,9 @@ void DrawPlot::drawSingleLineChart(QCustomPlot* Plot, const QVector<QString>& xd
     if (customPlot)
     {
         QVector<double> x, y;
-        double epsilon=0.1; //误差小于0.1说明0.1秒之内的数据，直接取平均
 
         //数据处理
-        ProcessData::processData(xdata,ydata,epsilon,x,y);
+        ProcessData::processData(xdata,ydata,DrawPlot::epsilonDrawPlot,x,y);
 
         // 创建折线图并设置数据:
         customPlot->addGraph();
@@ -54,11 +54,10 @@ void DrawPlot::drawScatterPlot(QCustomPlot* Plot, const QVector<QString>& xdata,
     {
 
         QVector<double> x, y;
-        double epsilon = 0.1; // 误差小于0.1说明0.1秒之内的数据，直接取平均
 
         // 数据处理
          DEBUG_LOG(xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size()) ;
-        ProcessData::processData(xdata, ydata, epsilon, x, y);
+        ProcessData::processData(xdata, ydata, DrawPlot::epsilonDrawPlot, x, y);
          DEBUG_LOG(xdata[0] << "处理后长度:" << x.size() << ydata[0] << "处理后长度:" << y.size()) ;
 
         // **创建原始散点图并设置数据**
@@ -97,11 +96,10 @@ void DrawPlot::drawScatterPlotAndSample(QCustomPlot* Plot, const QVector<QString
     {
 
         QVector<double> x, y;
-        double epsilon = 0.1; // 误差小于0.1说明0.1秒之内的数据，直接取平均
 
         // 数据处理
          DEBUG_LOG(xdata[0] << "未处理数据长度:" << xdata.size() << ydata[0] << "未处理数据长度:" << ydata.size());
-        ProcessData::processData(xdata, ydata, epsilon, x, y);
+        ProcessData::processData(xdata, ydata, DrawPlot::epsilonDrawPlot, x, y);
          DEBUG_LOG(xdata[0] << "长度:" << x.size() << ydata[0] << "长度:" << y.size());
 
         // **创建原始散点图并设置数据**
@@ -168,9 +166,8 @@ void DrawPlot::drawBoxPlot(QCustomPlot* Plot, const QVector<QString>& xdata,cons
         customPlot->clearItems();
 
         QVector<double> x, y;
-        double epsilon=0.1; //误差小于0.1说明0.1秒之内的数据，直接取平均
         //数据处理
-        ProcessData::processData(xdata,ydata,epsilon,x,y);
+        ProcessData::processData(xdata,ydata,DrawPlot::epsilonDrawPlot,x,y);
 
         QCPStatisticalBox *statistical = new QCPStatisticalBox(customPlot->xAxis, customPlot->yAxis);
         QBrush boxBrush(QColor(60, 60, 255, 100));
@@ -514,7 +511,7 @@ double DrawPlot::drawSelectedLineChartByM4Sample(QCustomPlot *Plot, const QVecto
     plot->setInteractions(QCP::iRangeDrag | QCP::iRangeZoom | QCP::iSelectPlottables);
     plot->axisRect()->setupFullAxesBox();
     plot->rescaleAxes();
-    plot->setFixedWidth(1000 + plot->axisRect()->margins().left() + plot->axisRect()->margins().right());
+//    plot->setFixedWidth(1000 + plot->axisRect()->margins().left() + plot->axisRect()->margins().right());
     plot->setAntialiasedElements(QCP::aeAll);
     plot->replot();
 

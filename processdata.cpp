@@ -47,8 +47,8 @@ QVector<double> ProcessData::preprocessQStringtoDouble(const QVector<QString> &Q
 
     return doubleData; // 返回转换后的QVector<double>
 }
-
-void ProcessData::processData(const QVector<QString>& xdata, const QVector<QString>& ydata, double epsilon, QVector<double>& x, QVector<double>& y)
+void ProcessData::processData(const QVector<QString>& xdata, const QVector<QString>& ydata,
+                              double epsilon, QVector<double>& x, QVector<double>& y)
 {
     // 取时间有效的数据，时间为0之后的数据
     QVector<QString> filteredXData;
@@ -56,43 +56,102 @@ void ProcessData::processData(const QVector<QString>& xdata, const QVector<QStri
 
     int startIndex = -1;
     for (int i = 0; i < xdata.size(); ++i) {
-        if (xdata[i] == "0"||(i>1&&(xdata[i].toDouble() < xdata[i-1].toDouble()))) {
+        if (xdata[i] == "0" || (i > 1 && (xdata[i].toDouble() < xdata[i - 1].toDouble()))) {
             startIndex = i;
             break;
         }
     }
 
-     DEBUG_LOG("startIndex:"<<startIndex);
+    DEBUG_LOG("startIndex:" << startIndex);
+
     if (startIndex != -1) {
-        for (int i = startIndex+1; i < xdata.size(); ++i) {
+        for (int i = startIndex + 1; i < xdata.size(); ++i) {
             filteredXData.append(xdata[i]);
             filteredYData.append(ydata[i]);
         }
     }
 
-    // 数据处理为时间序列，即时间间隔相等，0.2s每个时间片
-    double sum = 0;
-    int temp = 0;
-    int index = 0;
-
     x.clear();
     y.clear();
 
-    x.append(filteredXData[0].toDouble()); // 添加时间索引的第一个元素
-    for (int i = 0; i < filteredYData.size(); ++i)
-    {
-        if (fabs(filteredXData[i].toDouble() - x[index]) > epsilon)
-        {
-            y.append(sum / (i - temp));
-            index++;
-            x.append(filteredXData[i].toDouble());
-            temp = i;
-            sum = 0;
+    // ✅ 如果没有设置 epsilon（或 <= 0），直接返回原始数据
+    if (epsilon <= 0 || filteredXData.isEmpty()) {
+        for (int i = 0; i < filteredYData.size(); ++i) {
+            y.append(filteredYData[i].toDouble());
         }
-        sum = sum + filteredYData[i].toDouble();
+    } else {
+        // 否则执行原来的等间隔时间序列处理逻辑
+        double sum = 0;
+        int temp = 0;
+        int index = 0;
+
+        QVector<double> tempX;
+        tempX.append(filteredXData[0].toDouble());
+        for (int i = 0; i < filteredYData.size(); ++i) {
+            if (fabs(filteredXData[i].toDouble() - tempX[index]) > epsilon) {
+                y.append(sum / (i - temp));
+                index++;
+                tempX.append(filteredXData[i].toDouble());
+                temp = i;
+                sum = 0;
+            }
+            sum += filteredYData[i].toDouble();
+        }
+        y.append(sum / (filteredYData.size() - temp));
     }
-    y.append(sum / (filteredYData.size() - temp));
+
+    // ✅ 统一生成 x：从 0 到 y.size() - 1
+    for (int i = 0; i < y.size(); ++i) {
+        x.append(i);
+    }
 }
+
+// 以下是可以进行飞行时序数据平均采样的数据处理算法
+//void ProcessData::processData(const QVector<QString>& xdata, const QVector<QString>& ydata, double epsilon, QVector<double>& x, QVector<double>& y)
+//{
+//    // 取时间有效的数据，时间为0之后的数据
+//    QVector<QString> filteredXData;
+//    QVector<QString> filteredYData;
+
+//    int startIndex = -1;
+//    for (int i = 0; i < xdata.size(); ++i) {
+//        if (xdata[i] == "0"||(i>1&&(xdata[i].toDouble() < xdata[i-1].toDouble()))) {
+//            startIndex = i;
+//            break;
+//        }
+//    }
+
+//     DEBUG_LOG("startIndex:"<<startIndex);
+//    if (startIndex != -1) {
+//        for (int i = startIndex+1; i < xdata.size(); ++i) {
+//            filteredXData.append(xdata[i]);
+//            filteredYData.append(ydata[i]);
+//        }
+//    }
+
+//    // 数据处理为时间序列，即时间间隔相等，0.2s每个时间片
+//    double sum = 0;
+//    int temp = 0;
+//    int index = 0;
+
+//    x.clear();
+//    y.clear();
+
+//    x.append(filteredXData[0].toDouble()); // 添加时间索引的第一个元素
+//    for (int i = 0; i < filteredYData.size(); ++i)
+//    {
+//        if (fabs(filteredXData[i].toDouble() - x[index]) > epsilon)
+//        {
+//            y.append(sum / (i - temp));
+//            index++;
+//            x.append(filteredXData[i].toDouble());
+//            temp = i;
+//            sum = 0;
+//        }
+//        sum = sum + filteredYData[i].toDouble();
+//    }
+//    y.append(sum / (filteredYData.size() - temp));
+//}
 
 void ProcessData::processThreeData(const QVector<QString>& time, const QVector<QString>& Longitudedata, const QVector<QString>& Latitudedata, const QVector<QString>& Altitudedata, double epsilon, QVector<double>& t, QVector<float>& x, QVector<float>& y, QVector<float>& z)
 {

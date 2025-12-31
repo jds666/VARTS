@@ -30,7 +30,7 @@
     <item row="2" column="0">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="pageLine">
        <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -53,6 +53,12 @@
             </item>
             <item>
              <widget class="QLabel" name="label_2">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+                <pointsize>13</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Control Single Feature (for Univariate, Scatter, Boxplot)</string>
               </property>
@@ -78,6 +84,12 @@
             </item>
             <item>
              <widget class="QLabel" name="label_3">
+              <property name="font">
+               <font>
+                <family>Microsoft YaHei UI</family>
+                <pointsize>13</pointsize>
+               </font>
+              </property>
               <property name="text">
                <string>Control Multivariate Features</string>
               </property>
@@ -93,8 +105,8 @@
                 <rect>
                  <x>0</x>
                  <y>0</y>
-                 <width>384</width>
-                 <height>288</height>
+                 <width>586</width>
+                 <height>298</height>
                 </rect>
                </property>
                <layout class="QVBoxLayout" name="verticalLayout_2"/>
@@ -153,7 +165,7 @@
               </property>
               <property name="font">
                <font>
-                <family>Agency FB</family>
+                <family>Microsoft YaHei UI</family>
                 <pointsize>20</pointsize>
                </font>
               </property>
@@ -178,6 +190,14 @@
            </layout>
           </widget>
           <widget class="QTabWidget" name="tab">
+           <property name="font">
+            <font>
+             <family>Microsoft YaHei UI</family>
+             <pointsize>16</pointsize>
+             <weight>50</weight>
+             <bold>false</bold>
+            </font>
+           </property>
            <property name="currentIndex">
             <number>0</number>
            </property>
@@ -205,6 +225,14 @@
             <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="10">
              <item>
               <widget class="QScrollArea" name="scrollArea_line">
+               <property name="font">
+                <font>
+                 <family>Microsoft YaHei UI</family>
+                 <pointsize>16</pointsize>
+                 <weight>50</weight>
+                 <bold>false</bold>
+                </font>
+               </property>
                <property name="widgetResizable">
                 <bool>true</bool>
                </property>
@@ -213,8 +241,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>560</width>
-                  <height>485</height>
+                  <width>358</width>
+                  <height>486</height>
                  </rect>
                 </property>
                </widget>
@@ -298,6 +326,14 @@
             <horstretch>3</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
+          </property>
+          <property name="font">
+           <font>
+            <family>Microsoft YaHei UI</family>
+            <pointsize>13</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
           </property>
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
@@ -546,8 +582,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>135</width>
-                   <height>261</height>
+                   <width>100</width>
+                   <height>304</height>
                   </rect>
                  </property>
                 </widget>
@@ -576,8 +612,8 @@
                   <rect>
                    <x>0</x>
                    <y>0</y>
-                   <width>135</width>
-                   <height>261</height>
+                   <width>100</width>
+                   <height>304</height>
                   </rect>
                  </property>
                 </widget>
@@ -735,7 +771,7 @@
    <widget class="QMenu" name="menu">
     <property name="font">
      <font>
-      <family>Agency FB</family>
+      <family>Microsoft YaHei UI</family>
       <pointsize>16</pointsize>
      </font>
     </property>
@@ -745,8 +781,10 @@
     <widget class="QMenu" name="menu_3">
      <property name="font">
       <font>
-       <family>Agency FB</family>
+       <family>Microsoft YaHei</family>
        <pointsize>16</pointsize>
+       <weight>50</weight>
+       <bold>false</bold>
       </font>
      </property>
      <property name="contextMenuPolicy">
@@ -769,7 +807,7 @@
    <widget class="QMenu" name="menu_2">
     <property name="font">
      <font>
-      <family>Agency FB</family>
+      <family>Microsoft YaHei UI</family>
       <pointsize>16</pointsize>
      </font>
     </property>
@@ -807,11 +845,11 @@
   </widget>
   <action name="action_quit">
    <property name="text">
-    <string>exit</string>
+    <string>Exit</string>
    </property>
    <property name="font">
     <font>
-     <family>Agency FB</family>
+     <family>Microsoft YaHei UI</family>
      <pointsize>16</pointsize>
     </font>
    </property>
@@ -822,7 +860,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Agency FB</family>
+     <family>Microsoft YaHei UI</family>
      <pointsize>16</pointsize>
     </font>
    </property>
@@ -833,7 +871,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Agency FB</family>
+     <family>Microsoft YaHei UI</family>
      <pointsize>16</pointsize>
     </font>
    </property>
@@ -844,7 +882,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Agency FB</family>
+     <family>Microsoft YaHei UI</family>
      <pointsize>16</pointsize>
     </font>
    </property>
@@ -883,15 +921,33 @@
    <property name="text">
     <string>https://doc.qt.io/</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Microsoft YaHei UI</family>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_ad">
    <property name="text">
     <string>Anomaly Detection</string>
    </property>
+   <property name="font">
+    <font>
+     <family>Microsoft YaHei UI</family>
+     <pointsize>16</pointsize>
+    </font>
+   </property>
   </action>
   <action name="action_OpenGauss">
    <property name="text">
     <string>From OpenGauss DB</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Microsoft YaHei UI</family>
+     <pointsize>16</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_table">
@@ -902,6 +958,12 @@
   <action name="action_large">
    <property name="text">
     <string>Large-Scale Data Testing</string>
+   </property>
+   <property name="font">
+    <font>
+     <family>Microsoft YaHei UI</family>
+     <pointsize>16</pointsize>
+    </font>
    </property>
   </action>
   <action name="action_representative">
@@ -915,7 +977,7 @@
    </property>
    <property name="font">
     <font>
-     <family>Agency FB</family>
+     <family>Microsoft YaHei UI</family>
      <pointsize>16</pointsize>
     </font>
    </property>

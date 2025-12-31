@@ -74,6 +74,7 @@ MainWindow::MainWindow(QWidget *parent)
     //设置标题
 
     setWindowTitle("VARTS");
+    setStyleSheet("QWidget { font-size: 16pt; }");
 
     setWindowIcon(QIcon(":/visual"));
     ui->speedlabel->setAlignment(Qt::AlignCenter);  // 设置居中对齐
@@ -103,7 +104,7 @@ MainWindow::MainWindow(QWidget *parent)
     QIcon mlineIcon(":/mline");
 
     ui->tab->tabBar()->setTabIcon(0, lineIcon);
-    ui->tab->tabBar()->setTabIcon(1,mlineIcon);
+    ui->tab->tabBar()->setTabIcon(1, mlineIcon);
     ui->tab->tabBar()->setTabIcon(2, scatterIcon);
     ui->tab->tabBar()->setTabIcon(3, threeDscatterIcon);
     ui->tab->tabBar()->setTabIcon(4, pieIcon);
@@ -172,6 +173,17 @@ MainWindow::MainWindow(QWidget *parent)
 
     // 绑定上传自定义_numColumn.csv数据集按钮
     connect(ui->uploadButton, &QPushButton::clicked ,this, &MainWindow::handleUploadButtonTriggered);
+    // 连接 plot_representative 的 plottableClick 信号到槽函数
+    connect(ui->plot_representative,
+            SIGNAL(plottableClick(QCPAbstractPlottable*, int, QMouseEvent*)),
+            this,
+            SLOT(onPlotClicked(QCPAbstractPlottable*)));
+    // 连接 plot_original
+    connect(ui->plot_original,
+            SIGNAL(plottableClick(QCPAbstractPlottable*, int, QMouseEvent*)),
+            this,
+            SLOT(onPlotClicked(QCPAbstractPlottable*)));
+
 
     // 更换下拉框内容
     connect(ui->comboBox, SIGNAL(activated(int)), this, SLOT(onComboBoxIndexChanged()));
@@ -261,7 +273,6 @@ void MainWindow::updateLineChart()
                     ui->statusbar->showMessage("Drawing Dynamic Line Chart  " + QString::number(timeStart/5) + " seconds");
 
                     QVector<double> x, y;
-                    double epsilon=0.1;
                     //数据处理
                     ProcessData::processData(xdata,ydata,epsilon,x,y);
                     if (timeStart < x.size() - timeSize)
@@ -356,7 +367,7 @@ void MainWindow::updateLineChart()
             {
                 ui->statusbar->showMessage("Drawing Dynamic Line Chart  " + QString::number(timeStart/5) + " seconds");
                 QVector<double> x, y;
-                double epsilon=0.1;
+
                 ProcessData::processData(xdata,ydata,epsilon,x,y);
                 if (timeStart < x.size() - timeSize)
                 {
@@ -504,6 +515,41 @@ void MainWindow::handleCheckBoxStateChanged(int state)
         }
     }
 }
+
+// 处理 ui->plot_representative 的折线点击事件
+void MainWindow::onPlotClicked(QCPAbstractPlottable *plottable)
+{
+    // 1. 将 plottable 强制转换为 QCPGraph（因为绘制的是折线，排除其他类型绘图元素）
+    QCPGraph *clickedGraph = qobject_cast<QCPGraph*>(plottable);
+    if (clickedGraph == nullptr) {
+        return; // 若点击的不是折线（如坐标轴、图例），直接返回
+    }
+
+    // 2. 获取折线的 columnName（即之前用 setName 绑定的列名）
+    QString targetColumnName = clickedGraph->name();
+    DEBUG_LOG("点击折线对应的列名：" << targetColumnName);
+
+    // 下拉列表换为columnName
+    // 找列名在 comboBox 中对应的索引（验证有效性）
+    int targetIndex = ui->comboBox->findText(targetColumnName);
+    if (targetIndex == -1) {
+        DEBUG_LOG("警告：comboBox 中未找到列名：" << targetColumnName);
+        return; // 列名不存在，直接退出，避免后续错误
+    }
+
+    // 3. 避免重复触发：当前已选中目标列，则不操作
+    if (ui->comboBox->currentIndex() == targetIndex) {
+        DEBUG_LOG("当前已选中该列，无需重复加载");
+        return;
+    }
+
+    // 4. 设置 comboBox 选中，并触发 onComboBoxIndexChanged
+    ui->comboBox->setCurrentIndex(targetIndex);
+    // 如果你之前绑定的是 activated 信号，需要手动发射（currentIndexChanged 则无需）
+    emit ui->comboBox->activated(targetIndex);
+
+}
+
 void clearWidgetLayout(QWidget* widget) {
     QLayout* layout = widget->layout(); // 获取指定 QWidget 的布局
     if (layout) {
@@ -1133,7 +1179,7 @@ void MainWindow::onComboBoxIndexChanged()
 
         DrawPlot::drawScatterPlot(ui->pageScatter,xdata,ydata);
         DrawPlot::drawSingleLineChart(ui->single_line,xdata,ydata);
-        DrawPlot::drawBoxPlot(ui->pageBox,xdata,ydata,ui->comboBox->currentText());
+        DrawPlot::drawBoxPlot(ui->pageBox,xdata,ydata,comboBox->currentText());
     }
     else if(inputstatus == 4)
     {
@@ -1147,7 +1193,7 @@ void MainWindow::onComboBoxIndexChanged()
         // 调用绘制图函数，将数据传递给它
         DrawPlot::drawScatterPlotByDB(ui->pageScatter,xdata,ydata,columnNamex,columnNamey);
         DrawPlot::drawSingleLineChartByDB(ui->single_line,xdata,ydata,columnNamex,columnNamey);
-        DrawPlot::drawBoxPlotByDB(ui->pageBox,ydata,ui->comboBox->currentText());
+        DrawPlot::drawBoxPlotByDB(ui->pageBox,ydata,comboBox->currentText());
 
     }
     else
@@ -1189,7 +1235,6 @@ void MainWindow::onRestartButtonClicked()
             {
                 // 准备绘图数据
                 QVector<double> x, y;
-                double epsilon=0.1; //误差小于0.1说明0.1秒之内的数据，直接取平均
 
                 //数据处理
                 ProcessData::processData(xdata, ydata, epsilon, x, y);
@@ -1270,7 +1315,6 @@ QCustomPlot *MainWindow::createLineChart(const QString& yText)
         {
 
             QVector<double> x, y;
-            double epsilon = 0.1; //误差小于0.1说明0.1秒之内的数据，直接取平均
 
             //数据处理
             ProcessData::processData(xdata, ydata, epsilon, x, y);
@@ -1452,9 +1496,9 @@ void MainWindow::drawThreeD(const QVector<QString>& timeData)
 
     QVector<double> t;
     QVector<float> x, y, z;
-    double epsilon = 20;
+    double epsilonThreeD = 20;
 
-    ProcessData::processThreeData(timeData, Longitudedata, Latitudedata, Altitudedata, epsilon, t, x, y, z);
+    ProcessData::processThreeData(timeData, Longitudedata, Latitudedata, Altitudedata, epsilonThreeD, t, x, y, z);
 
     // 创建 3D 散点图
     QtDataVisualization::Q3DScatter *graph = new QtDataVisualization::Q3DScatter();
@@ -1831,6 +1875,11 @@ void MainWindow::drawPiePlot(const QStringList& columnNames)
     layout->addWidget(chartView2, 0, 1);
     layout->addWidget(chartView3, 1, 0);
     layout->addWidget(chartView4, 1, 1);
+    // 让每一行、每一列空间相等
+    layout->setRowStretch(0, 1);
+    layout->setRowStretch(1, 1);
+    layout->setColumnStretch(0, 1);
+    layout->setColumnStretch(1, 1);
 
     // 设置新布局
     ui->pagePie->setLayout(layout);
@@ -2233,7 +2282,8 @@ void MainWindow::loadDatasetAndUpdateRepresentativePage(const QString &selectedF
 {
     try {
         if (selectedFile.isEmpty()) return;
-
+        // 先清空现有数据
+        rawData.clear();
         rawData = Util::readCSVWithColumnNames(selectedFile);
 
         // 检查数据是否为空

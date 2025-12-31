@@ -74,6 +74,7 @@ private:
     bool isPlaying = false;
     int playSpeed = 1;
     QTimer *timer = nullptr;
+    double epsilon = 0; //折线图数据聚合的时间间隔大小,误差小于0.1说明0.1秒之内的数据，直接取平均
 
     bool lineDrawn = false;
     bool adDrawn = false;
@@ -140,6 +141,8 @@ private slots:
     void handleSelectKValueChanged();
     void handleSelectAlphaValueChanged();
     void handleCheckBoxStateChanged(int state);
+    void onPlotClicked(QCPAbstractPlottable *plottable);
+
 };
 
 #endif // MAINWINDOW_H

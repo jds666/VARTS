@@ -42,6 +42,8 @@ public:
     static void applySlidingAverageWithStep(const QVector<double>& x, const QVector<double>& y, int windowSize, QVector<double>& smoothedX, QVector<double>& smoothedY);
     // 固定窗口采样函数：每隔 windowSize 个数据点采样一次
     static void applyFixedWindowSampling(const QVector<double>& x, const QVector<double>& y, int windowSize, QVector<double>& fixedX, QVector<double>& fixedY);
+
+    static double epsilonDrawPlot; //折线图数据聚合的时间间隔大小,误差小于0.1说明0.1秒之内的数据，直接取平均
 };
 #endif // DRAWPLOT_H
 
